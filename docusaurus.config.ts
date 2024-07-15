@@ -57,55 +57,65 @@ const config: Config = {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "My Site",
+      title: "Kidper Docs",
       logo: {
-        alt: "My Site Logo",
+        alt: "Kidper Docs Logo",
         src: "img/logo.svg",
       },
       items: [
         {
           type: "docSidebar",
-          sidebarId: "tutorialSidebar",
+          sidebarId: "DocumentationSidebar",
           position: "left",
-          label: "Tutorial",
+          label: "Documentation",
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/facebook/docusaurus",
-          label: "GitHub",
+          "aria-label": "GitHub Repository",
+          className: "navbar--github-link",
+          href: "https://github.com/Shellpaca/kidper",
           position: "right",
         },
       ],
     },
     footer: {
+      // TODO("ロゴを挿入する")
+      // logo: {
+      //   alt: "Meta Open Source Logo",
+      //   src: "img/meta_oss_logo.png",
+      //   href: "https://opensource.fb.com",
+      //   width: 160,
+      //   height: 51,
+      // },
       style: "dark",
       links: [
         {
-          title: "Docs",
+          title: "Documentation",
           items: [
             {
-              label: "Tutorial",
+              label: "Documentation",
               to: "/docs/intro",
             },
           ],
         },
-        {
-          title: "Community",
-          items: [
-            {
-              label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/docusaurus",
-            },
-            {
-              label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
-            },
-            {
-              label: "Twitter",
-              href: "https://twitter.com/docusaurus",
-            },
-          ],
-        },
+        // TODO("ヘッダーのリンクは一旦、コメントアウト")
+        // {
+        //   title: "Community",
+        //   items: [
+        // {
+        //   label: "Stack Overflow",
+        //   href: "https://stackoverflow.com/questions/tagged/docusaurus",
+        // },
+        // {
+        //   label: "Discord",
+        //   href: "https://discordapp.com/invite/docusaurus",
+        // },
+        // {
+        //   label: "Twitter",
+        //   href: "https://twitter.com/docusaurus",
+        // },
+        // ],
+        // },
         {
           title: "More",
           items: [
@@ -115,12 +125,12 @@ const config: Config = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/Shellpaca/kidper",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Kidper, kai-ota.`,
     },
     prism: {
       theme: prismThemes.github,
