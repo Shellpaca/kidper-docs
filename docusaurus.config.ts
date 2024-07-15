@@ -4,7 +4,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "Kidper Docs",
-  tagline: "Record your child's growth",
+  tagline: "子どもの成長を記録して家族に公開するためのアプリ",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
