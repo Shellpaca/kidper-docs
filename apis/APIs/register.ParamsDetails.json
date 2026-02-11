@@ -1,0 +1,1 @@
+{"parameters":[{"name":"Idempotency-Key","in":"header","description":"冪等性キー","required":true,"schema":{"maxLength":36,"minLength":36,"pattern":"UUID","type":"string","description":"冪等性キー","example":"9b274b0a-c7fe-e61b-ece4-25a1d688ef49"},"example":"9b274b0a-c7fe-e61b-ece4-25a1d688ef49"},{"name":"invitationCode","in":"path","required":true,"schema":{"type":"string"}}]}

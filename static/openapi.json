@@ -1,0 +1,5050 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Kidper API",
+    "description": "KidperAPI仕様書",
+    "version": "v1"
+  },
+  "servers": [
+    { "url": "http://localhost:8000", "description": "Generated server url" }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "tags": [
+    {
+      "name": "コンテンツ",
+      "description": "\n        コンテンツ（画像・動画など）に関するAPI群。\n\n        【アップロード】\n        - 小容量コンテンツ（4MB以下）を1回でアップロードしてポストする\n            - コンテンツアップロードAPI\n\n        - 大容量コンテンツをチャンクに分割してアップロードする\n            - コンテンツチャンクアップロードAPI\n            - コンテンツチャンクアップロード結合API\n\n        【ダウンロード / 取得】\n        - オリジナルのコンテンツファイルをダウンロードする\n            - コンテンツファイルダウンロードAPI\n\n        - ポスト経由でコンテンツ情報およびバイナリを取得する\n            - ポスト取得API（ポストを参照）\n            - コンテンツファイル取得API\n"
+    },
+    {
+      "name": "ポスト",
+      "description": "\n        ポストの作成の流れ\n        - ポストトラフト......ポスト準備状態\n        - コンテンツチャンクアップロード......チャンクに分割してコンテンツアップロード\n        - コンテンツチャンクアップロード結合......チャンクを結合し、ポスト公開で更新\n    "
+    }
+  ],
+  "paths": {
+    "/api/v1/posts/{postId}/contents:chunks-upload": {
+      "put": {
+        "tags": ["コンテンツ"],
+        "summary": "コンテンツチャンクアップロードAPI",
+        "description": "\n            「大きいファイル用のチャンク分割」\n            \n            コンテンツファイルを複数のチャンクに分割し、チャンク単位でアップロードする。\n            すべてのチャンクアップロード完了後、コンテンツチャンクアップロード結合APIを実行することで、\n            1つのコンテンツファイルとして構成される。\n    \n            同一チャンク（同一のチャンク番号）に対するリトライは可能であり、リトライ時には該当チャンクは上書きされる。\n            チャンクのアップロードは並列に実行することができる。\n        \n            事前条件\n              - 1チャンクあたりのファイルサイズは 4MB 以下であること\n        ",
+        "operationId": "chunkUpload",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          {
+            "name": "Chunk-Index",
+            "in": "header",
+            "description": "チャンクインデックス",
+            "required": true,
+            "schema": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "pattern": "半角数字",
+              "type": "string",
+              "description": "チャンクインデックス",
+              "example": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "Chunk-Total",
+            "in": "header",
+            "description": "合計チャンク数",
+            "required": true,
+            "schema": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "pattern": "半角数字",
+              "type": "string",
+              "description": "合計チャンク数",
+              "example": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "issued_at",
+            "in": "query",
+            "description": "開始時刻",
+            "required": true,
+            "schema": {
+              "maxLength": 10,
+              "minLength": 10,
+              "pattern": "エポック秒",
+              "type": "string",
+              "description": "開始時刻",
+              "example": 1770036978
+            },
+            "example": 1770036978
+          },
+          {
+            "name": "expires_at",
+            "in": "query",
+            "description": "有効期限時刻",
+            "required": true,
+            "schema": {
+              "maxLength": 10,
+              "minLength": 10,
+              "pattern": "エポック秒",
+              "type": "string",
+              "description": "有効期限時刻",
+              "example": 1770037578
+            },
+            "example": 1770037578
+          },
+          {
+            "name": "algorithm",
+            "in": "query",
+            "description": "アルゴリズム",
+            "required": true,
+            "schema": {
+              "maxLength": 11,
+              "minLength": 11,
+              "pattern": "HMAC-SHA256",
+              "type": "string",
+              "description": "アルゴリズム",
+              "example": "HMAC-SHA256"
+            },
+            "example": "HMAC-SHA256"
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "description": "署名",
+            "required": true,
+            "schema": {
+              "maxLength": 27,
+              "minLength": 27,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string",
+              "description": "署名",
+              "example": "Na7INaFLW7_pddfh7MZCXmPnX5I"
+            },
+            "example": "Na7INaFLW7_pddfh7MZCXmPnX5I"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "202": { "description": "Accepted" }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}": {
+      "put": {
+        "tags": ["ファミリー"],
+        "summary": "ファミリー情報更新API",
+        "description": "ファミリーIDに紐づくファミリー情報を全て更新する",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+            },
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PutFamilyRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/PutFamilyResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["ファミリー"],
+        "summary": "ファミリー削除API",
+        "description": "ファミリーIDに紐づくファミリーを削除する",
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+            },
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/posts/{postId}/contents:upload": {
+      "post": {
+        "tags": ["コンテンツ"],
+        "summary": "コンテンツアップロードAPI",
+        "description": "\n            「小さいファイル用のショートカット（チャンクを使わない代替ルート）」\n            \n            単一リクエストでコンテンツ（バイナリデータ）をアップロードする。\n            本APIは、チャンクアップロードを使用しない小容量コンテンツ向けである。\n        \n            アップロード完了後、コンテンツはポストに紐付けられ、ポストの公開ステータスは「公開」に変更される。\n        \n            事前条件\n              - アップロードするコンテンツのファイルサイズは 4MB 以下であること\n              - ポストの公開ステータスが「未公開」であること（ポストドラフトAPIを参照）\n        ",
+        "operationId": "upload",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "Checksum",
+            "in": "header",
+            "description": "チェックサム",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "minLength": 40,
+              "pattern": "SHA-1",
+              "type": "string",
+              "description": "チェックサム",
+              "example": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
+            },
+            "example": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          {
+            "name": "issued_at",
+            "in": "query",
+            "description": "開始時刻",
+            "required": true,
+            "schema": {
+              "maxLength": 10,
+              "minLength": 10,
+              "pattern": "エポック秒",
+              "type": "string",
+              "description": "開始時刻",
+              "example": 1770036978
+            },
+            "example": 1770036978
+          },
+          {
+            "name": "expires_at",
+            "in": "query",
+            "description": "有効期限時刻",
+            "required": true,
+            "schema": {
+              "maxLength": 10,
+              "minLength": 10,
+              "pattern": "エポック秒",
+              "type": "string",
+              "description": "有効期限時刻",
+              "example": 1770037578
+            },
+            "example": 1770037578
+          },
+          {
+            "name": "algorithm",
+            "in": "query",
+            "description": "アルゴリズム",
+            "required": true,
+            "schema": {
+              "maxLength": 11,
+              "minLength": 11,
+              "pattern": "HMAC-SHA256",
+              "type": "string",
+              "description": "アルゴリズム",
+              "example": "HMAC-SHA256"
+            },
+            "example": "HMAC-SHA256"
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "description": "署名",
+            "required": true,
+            "schema": {
+              "maxLength": 27,
+              "minLength": 27,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string",
+              "description": "署名",
+              "example": "Na7INaFLW7_pddfh7MZCXmPnX5I"
+            },
+            "example": "Na7INaFLW7_pddfh7MZCXmPnX5I"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/posts/{postId}/contents:chunks-complete": {
+      "post": {
+        "tags": ["コンテンツ"],
+        "summary": "コンテンツチャンクアップロード結合API",
+        "description": "\n        「ポスト公開の最終確定」\n        \n        アップロード済みのすべてのチャンクを結合し、1つのコンテンツファイルを生成する。\n\n        結合後に全体チェックサムの検証を行い、検証が成功した場合のみ\n        対象ポストの公開ステータスを「公開」に更新する。\n        \n        チェックサム検証に失敗した場合、またはチャンクが不足している場合は\n        コンテンツは確定されず、ポストの公開ステータスは変更されない。\n        \n        チャンクの不足やチャンク結合に失敗した場合でも、ポストおよびコンテンツは確定されず、状態は変更されない。\n        必要なチャンクを補完した上で、本APIをリトライすることで再構成することができる。\n        再構成時に既にファイルが存在する場合は、ファイルを上書きする。\n        \n        事前条件\n          - すべてのチャンクがアップロード済みであること。\n          - ポストの公開ステータスが「未公開」であること（ポストドラフトAPIを参照）。\n    ",
+        "operationId": "chunkUploadComplete",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          {
+            "name": "Checksum",
+            "in": "header",
+            "description": "チェックサム",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "minLength": 40,
+              "pattern": "SHA-1",
+              "type": "string",
+              "description": "チェックサム",
+              "example": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
+            },
+            "example": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
+          },
+          {
+            "name": "Chunk-Total",
+            "in": "header",
+            "description": "合計チャンク数",
+            "required": true,
+            "schema": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "pattern": "半角数字",
+              "type": "string",
+              "description": "合計チャンク数",
+              "example": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "File-Name",
+            "in": "header",
+            "description": "ファイル名",
+            "required": true,
+            "schema": {
+              "maxLength": 255,
+              "minLength": 1,
+              "pattern": "^[^\\/:*?\"<>|]+$。先頭.(ドット)不可",
+              "type": "string",
+              "description": "ファイル名",
+              "example": "DSC_0001.jpeg"
+            },
+            "example": "DSC_0001.jpeg"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/invitations/{invitationCode}/register": {
+      "post": {
+        "tags": ["招待"],
+        "summary": "招待コードメンバー登録API",
+        "description": "招待コードを使用してファミリーメンバーを登録する",
+        "operationId": "register",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "invitationCode",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterFamilyInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterFamilyInvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/posts/draft": {
+      "post": {
+        "tags": ["ポスト"],
+        "summary": "ポストドラフトAPI",
+        "description": "\n            未公開状態のポスト（ドラフト）を作成する。\n            本APIは、コンテンツアップロード前にポストに関する基本情報を登録し、\n            ポスト識別子（postId）を確定させるために使用する。\n            \n            本APIの実施時点では、ポストは公開されておらず、コンテンツ（画像・動画等）は一切登録されていない点に留意すること。\n            \n            後続処理として、コンテンツアップロード、および ポスト公開を実行する必要がある。\n        ",
+        "operationId": "draft",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+            },
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DraftPostRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/DraftPostResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/members/register": {
+      "post": {
+        "tags": ["ファミリーメンバー"],
+        "summary": "ファミリーメンバー登録API",
+        "description": "ファミリーメンバーを登録する",
+        "operationId": "register_1",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+            },
+            "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FamilyMemberRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/invitations/issue": {
+      "post": {
+        "tags": ["招待"],
+        "summary": "招待コードメンバー登録API",
+        "description": "招待コードを使用してファミリーメンバーを登録する",
+        "operationId": "issue",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+            },
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueInvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/children/register": {
+      "post": {
+        "tags": ["子ども"],
+        "summary": "子ども登録API",
+        "description": "子どもを登録する",
+        "operationId": "register_2",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+            },
+            "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterChildRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterChildResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/families/register": {
+      "post": {
+        "tags": ["ファミリー"],
+        "summary": "ファミリー登録API",
+        "description": "ファミリーを登録する",
+        "operationId": "register_3",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateFamilyRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFamilyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/signup": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "サインアップAPI",
+        "description": "新しいアカウントを作成する。<br/>本APOを実施後にメールによるアクティベートサインアップも必要。",
+        "operationId": "signup",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SignupRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "202": { "description": "Accepted" }
+        }
+      }
+    },
+    "/api/v1/auth/refresh-token": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "リフレッシュトークンAPI",
+        "description": "ログイン時に払い出されたリフレッシュトークンを用いてアクセストークンを払い出す。",
+        "operationId": "refreshToken",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshTokenRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/otp/verify": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "OTP検証API",
+        "description": "OTPの検証を実施する。検証に成功するとログインができる",
+        "operationId": "verify",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "description": "ユーザーエージェント",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 5,
+              "pattern": "OSとブラウザとブラウザメジャーバージョンが必須",
+              "type": "string",
+              "description": "ユーザーエージェント",
+              "example": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+            },
+            "example": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOneTimePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOneTimePasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/otp/setup": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "OTPセットアップAPI",
+        "description": "OTPの仮登録、OTP認証URIを作成する。",
+        "operationId": "setup",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupOneTimePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupOneTimePasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/otp/register": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "OTP登録API",
+        "description": "OTPの登録する。ユーザーアクティベートによってOTPの本登録とリカバリーコードの作成が実施される。",
+        "operationId": "register_4",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterOneTimePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "202": { "description": "Accepted" }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "ログアウトAPI",
+        "description": "ユーザーがアプリからログアウトする。<br/>同時にアクセストークンとリフレッシュトークンをブラックリストに登録する",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogoutRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "ログインAPI",
+        "description": "ユーザーがアプリにログインする",
+        "operationId": "login",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "description": "ユーザーエージェント",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 5,
+              "pattern": "OSとブラウザとブラウザメジャーバージョンが必須",
+              "type": "string",
+              "description": "ユーザーエージェント",
+              "example": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+            },
+            "example": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/activate/user": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "ユーザーアクティベートAPI",
+        "description": "\n            ユーザーをアクティベートする。\n            サインアップとメール認証は必須で実施しておく必要がある。また、OTP認証も必須である。\n            それぞれの認証実施後に本APIを実行することによってユーザーを本登録（有効化）する。\n        ",
+        "operationId": "user",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          },
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserActivateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserActivateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/activate/email": {
+      "post": {
+        "tags": ["認証"],
+        "summary": "メールアドレスアクティベートAPI",
+        "description": "メールアドレスをアクティベートする",
+        "operationId": "email",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "冪等性キー",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "冪等性キー",
+              "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+            },
+            "example": "9b274b0a-c7fe-e61b-ece4-25a1d688ef49"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EmailActivateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "202": { "description": "Accepted" }
+        }
+      }
+    },
+    "/api/v1/posts/{postId}/unpublish": {
+      "patch": {
+        "tags": ["ポスト"],
+        "summary": "ポスト非公開API",
+        "description": "ポストの公開ステータスを非公開に変更する",
+        "operationId": "unpublish",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/posts/{postId}/publish": {
+      "patch": {
+        "tags": ["ポスト"],
+        "summary": "ポスト公開API",
+        "description": "ポストの公開ステータスを公開に変更する",
+        "operationId": "publish",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/dev/v1/health": {
+      "get": {
+        "tags": ["開発用"],
+        "operationId": "health",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthDevelopResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dev/v1/auth/{email}": {
+      "get": {
+        "tags": ["開発用"],
+        "operationId": "authToken",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokenDevelopResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/view": {
+      "get": {
+        "tags": ["ユーザー"],
+        "summary": "ユーザー描画情報取得API",
+        "description": "ユーザー描画情報を取得する",
+        "operationId": "find",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/UserViewResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/posts/{postId}": {
+      "get": {
+        "tags": ["ポスト"],
+        "summary": "ポスト取得API",
+        "description": "指定したポストを1件取得する",
+        "operationId": "find_1",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "description": "ポストID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ポストID",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/FindPostResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/family": {
+      "get": {
+        "tags": ["自分"],
+        "summary": "ユーザー家族ビュー取得API",
+        "description": "ログインユーザーの家族情報を取得する描画用API",
+        "operationId": "family",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/MeFamilyResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invitations/{invitationCode}": {
+      "get": {
+        "tags": ["招待"],
+        "summary": "ファミリー招待取得API",
+        "description": "発行済みの招待コードを元にファミリー招待情報を取得する",
+        "operationId": "find_2",
+        "parameters": [
+          {
+            "name": "invitationCode",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindFamilyInvitationCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["招待"],
+        "summary": "ファミリー招待削除API",
+        "description": "発行済みの招待コードを元にファミリー招待情報を削除する",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "invitationCode",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/posts": {
+      "get": {
+        "tags": ["ポスト"],
+        "summary": "ポスト取得一覧API",
+        "description": "指定した数のポストをポストを取得する",
+        "operationId": "findList",
+        "parameters": [
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "\n                スタートカーソル\n                取得したい最初のポストIDを指定する。指定された位置を開始位置としてリミット分取得する。\n            ",
+            "required": false,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "\n                スタートカーソル\n                取得したい最初のポストIDを指定する。指定された位置を開始位置としてリミット分取得する。\n            ",
+              "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+            },
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "\n                リミット\n                カーソルが指定した位置からリミット数分の要素を取得する。\n                ただし、リミット数よりも要素が少ない場合は、取得可能な要素までを返す。\n            ",
+            "required": false,
+            "schema": {
+              "maxLength": 20,
+              "minLength": 1,
+              "pattern": "半角数字",
+              "type": "string",
+              "description": "\n                リミット\n                カーソルが指定した位置からリミット数分の要素を取得する。\n                ただし、リミット数よりも要素が少ない場合は、取得可能な要素までを返す。\n            ",
+              "example": 12
+            },
+            "example": 12
+          },
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+            },
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindListPostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/families/{familyId}/members": {
+      "get": {
+        "tags": ["ファミリーメンバー"],
+        "summary": "ファミリーメンバー取得API",
+        "description": "ファミリーメンバーを取得する",
+        "operationId": "find_3",
+        "parameters": [
+          {
+            "name": "familyId",
+            "in": "path",
+            "description": "ファミリーID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "ファミリーID",
+              "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+            },
+            "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindFamilyMembersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contents/{contentId}:download": {
+      "get": {
+        "tags": ["コンテンツ"],
+        "summary": "コンテンツファイルダウンロードAPI",
+        "description": "\n            コンテンツファイルダウンロードする\n            コンテンツ取得はUI用にリザイズされているが、\n            本APIはオリジナルのファイルをダウンロードできる。\n        ",
+        "operationId": "download",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "description": "コンテントID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "コンテントID",
+              "example": "ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"
+            },
+            "example": "ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "type": "string", "format": "byte" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contents/{contentId}/capability/{contentCapabilityToken}": {
+      "get": {
+        "tags": ["コンテンツ"],
+        "summary": "コンテンツファイル取得API",
+        "description": "\n            コンテンツファイルダウンロードする\n            コンテンツ取得はUI用にリザイズされているが、\n            本APIはオリジナルのファイルをダウンロードできる。\n        ",
+        "operationId": "find_4",
+        "parameters": [
+          {
+            "name": "contentCapabilityToken",
+            "in": "path",
+            "description": "コンテンツケイパビリティトークン",
+            "required": true,
+            "schema": {
+              "maxLength": 22,
+              "minLength": 22,
+              "pattern": "^[a-zA-Z0-9_-]{22}$",
+              "type": "string",
+              "description": "コンテンツケイパビリティトークン",
+              "example": "ycq0gD5Ex0fa6c4aiJHXuw"
+            },
+            "example": "ycq0gD5Ex0fa6c4aiJHXuw"
+          },
+          {
+            "name": "contentId",
+            "in": "path",
+            "description": "コンテントID",
+            "required": true,
+            "schema": {
+              "maxLength": 36,
+              "minLength": 36,
+              "pattern": "UUID",
+              "type": "string",
+              "description": "コンテントID",
+              "example": "ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"
+            },
+            "example": "ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "type": "string", "format": "byte" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/health": {
+      "get": {
+        "tags": ["認証"],
+        "summary": "ヘルスチェックAPI",
+        "description": "認証をパスするか確認するためのAPI。",
+        "operationId": "health_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "アクセストークン",
+            "required": true,
+            "schema": {
+              "maxLength": 3000,
+              "minLength": 100,
+              "pattern": "JWT",
+              "type": "string",
+              "description": "アクセストークン",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            },
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DevelopErrorResponse": {
+        "title": "開発用エラーレスポンス",
+        "required": ["message", "title"],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "タイトル",
+            "example": "開発用エンドポイント"
+          },
+          "message": {
+            "type": "string",
+            "description": "例外の種類ごとに固定のメッセージを返却する",
+            "example": "APIが想定していないリクエストが送られました。"
+          }
+        },
+        "description": "エラー情報"
+      },
+      "ErrorResponse": {
+        "title": "エラーレスポンス",
+        "required": ["errorCode", "message", "timestamp", "title"],
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "description": "タイムスタンプ。返却する直前の時刻",
+            "example": "2024-01-01T12:00:00.123"
+          },
+          "title": {
+            "type": "string",
+            "description": "タイトル",
+            "example": "リクエスト不正"
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "エラーコード",
+            "example": "エラーを識別するコード"
+          },
+          "message": {
+            "type": "string",
+            "description": "例外の種類ごとに固定のメッセージを返却する",
+            "example": "APIが想定していないリクエストが送られました。"
+          },
+          "exception": {
+            "type": "string",
+            "description": "例外発生箇所のエラーメッセージ",
+            "example": "パラメーターがバリデーションで例外発生"
+          }
+        },
+        "description": "エラー情報"
+      },
+      "PutFamilyRequest": {
+        "title": "ファミリー更新リクエスト",
+        "required": ["familyName"],
+        "type": "object",
+        "properties": {
+          "familyName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリー名",
+            "example": "たなか"
+          },
+          "familyIcon": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリーアイコン",
+            "example": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAEElEQVR4nGKatqAdEAAA//8DlQHA+1kqagAAAABJRU5ErkJggg=="
+          }
+        },
+        "description": "ファミリー情報を更新する"
+      },
+      "PutFamilyResponse": {
+        "title": "ファミリー更新レスポンス",
+        "required": ["familyId", "familyName"],
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          },
+          "familyName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリー名",
+            "example": "たなか"
+          },
+          "familyIcon": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリーアイコン",
+            "example": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAEElEQVR4nGKatqAdEAAA//8DlQHA+1kqagAAAABJRU5ErkJggg=="
+          }
+        },
+        "description": "ファミリー更新後のファミリー情報"
+      },
+      "RegisterFamilyInvitationRequest": {
+        "title": "招待ファミリー登録リクエスト",
+        "required": ["nickname"],
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ニックネーム",
+            "example": "パパ"
+          }
+        },
+        "description": "取得するファミリー招待の情報"
+      },
+      "RegisterFamilyInvitationResponse": {
+        "title": "招待ファミリー登録レスポンス",
+        "required": ["familyId", "familyMemberId", "familyMemberRoleType"],
+        "type": "object",
+        "properties": {
+          "familyId": { "type": "string" },
+          "familyMemberId": { "type": "string" },
+          "familyMemberRoleType": { "type": "string" }
+        },
+        "description": "ファミリー招待した情報"
+      },
+      "DraftPostRequest": {
+        "title": "ポストドラフトリクエスト",
+        "required": ["childId", "contentPublishScope"],
+        "type": "object",
+        "properties": {
+          "contentPublishScope": {
+            "pattern": "ADMIN|ALL",
+            "type": "string",
+            "description": "\n            コンテント公開スコープ\n            - ADMIN: 管理者\n            - ALL: 全員\n        ",
+            "example": "ADMIN"
+          },
+          "childId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "子どもID",
+            "example": "たろう"
+          }
+        },
+        "description": "ドラフト登録するポスト情報"
+      },
+      "DraftPostResponse": {
+        "title": "ポストドラフト登録レスポンス",
+        "required": ["postId", "uploadPresignedUrl"],
+        "type": "object",
+        "properties": {
+          "postId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ポストID",
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          "uploadPresignedUrl": {
+            "maxLength": 500,
+            "minLength": 100,
+            "pattern": "URL",
+            "type": "string",
+            "description": "アップロード署名付きURL",
+            "example": "http://localhost:8080/api/v1/posts/019c1e5a-6961-7d06-a1d5-9d4723832379/contents:chunks-upload?signature=cczAfKO8RSv3m82hXcQMotW5qGI&algorithm=HMAC-SHA256&issued_at=1770035767&expires_at=1770036367"
+          }
+        },
+        "description": "ドラフト登録したポスト情報"
+      },
+      "FamilyMemberRequest": {
+        "title": "ファミリーメンバーリクエスト",
+        "required": ["familyMemberRoleType", "nickname", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザID",
+            "example": "0cc111e5-7124-a974-911a-d2c940707d2a"
+          },
+          "nickname": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ニックネーム",
+            "example": "パパ"
+          },
+          "familyMemberRoleType": {
+            "pattern": "ADMIN or VIEWER",
+            "type": "string",
+            "description": "ファミリーメンバー権限",
+            "example": "ADMIN"
+          }
+        },
+        "description": "ファミリーメンバーの情報"
+      },
+      "IssueInvitationRequest": {
+        "title": "招待登録リクエスト",
+        "required": ["familyMemberRoleType"],
+        "type": "object",
+        "properties": {
+          "familyMemberRoleType": {
+            "pattern": "ADMIN|VIEWER",
+            "type": "string",
+            "description": "\n            ファミリーメンバー権限\n            - ADMIN: 管理者\n            - VIEWER: 閲覧者\n        ",
+            "example": "ADMIN"
+          }
+        },
+        "description": "作成するファミリー招待の情報"
+      },
+      "IssueInvitationResponse": {
+        "title": "招待発行レスポンス",
+        "required": ["createdAt", "expiry", "invitationCode"],
+        "type": "object",
+        "properties": {
+          "invitationCode": {
+            "maxLength": 20,
+            "minLength": 20,
+            "pattern": "半角数字",
+            "type": "string",
+            "description": "ファミリー招待コード",
+            "example": "01234567890123456789"
+          },
+          "expiry": {
+            "maxLength": 20,
+            "minLength": 20,
+            "pattern": "半角数字",
+            "type": "integer",
+            "description": "有効期限",
+            "format": "int64",
+            "example": 259200
+          },
+          "createdAt": {
+            "maxLength": 26,
+            "minLength": 26,
+            "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+            "type": "string",
+            "description": "作成日時",
+            "format": "date-time"
+          }
+        },
+        "description": "発行したファミリー招待の情報"
+      },
+      "RegisterChildRequest": {
+        "title": "子ども登録リクエスト",
+        "required": ["birthday", "childName", "sex"],
+        "type": "object",
+        "properties": {
+          "childName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "子ども名",
+            "example": "たろう"
+          },
+          "sex": {
+            "pattern": "MALE|FEMALE",
+            "type": "string",
+            "description": "\n            性別\n            - MALE: 男性\n            - FEMALE: 女性\n        ",
+            "example": "MALE"
+          },
+          "birthday": {
+            "maxLength": 10,
+            "minLength": 10,
+            "pattern": "yyyy-MM-dd",
+            "type": "string",
+            "description": "生年月日",
+            "format": "date",
+            "example": "2025-06-08"
+          }
+        },
+        "description": "追加する子どもの情報"
+      },
+      "RegisterChildResponse": {
+        "title": "子ども登録レスポンス",
+        "required": ["birthday", "childId", "childName", "sex"],
+        "type": "object",
+        "properties": {
+          "childId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "子どもID",
+            "example": "7b9175b7-16e9-4c8c-8b16-16c9bbab6efa"
+          },
+          "childName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "子ども名",
+            "example": "たろう"
+          },
+          "sex": {
+            "pattern": "MALE|FEMALE",
+            "type": "string",
+            "description": "\n            性別\n            - MALE: 男性\n            - FEMALE: 女性\n        ",
+            "example": "MALE"
+          },
+          "birthday": {
+            "maxLength": 10,
+            "minLength": 10,
+            "pattern": "yyyy-MM-dd",
+            "type": "string",
+            "description": "生年月日",
+            "format": "date",
+            "example": "2025-06-08"
+          }
+        },
+        "description": "追加した子どもの情報"
+      },
+      "CreateFamilyRequest": {
+        "title": "ファミリー作成リクエスト",
+        "required": ["familyName"],
+        "type": "object",
+        "properties": {
+          "familyName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリー名",
+            "example": "たなか"
+          }
+        },
+        "description": "ファミリーを作成する際に必要な情報"
+      },
+      "CreateFamilyResponse": {
+        "title": "ファミリー作成レスポンス",
+        "required": ["familyId", "familyName"],
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          },
+          "familyName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリー名",
+            "example": "たなか"
+          }
+        },
+        "description": "ファミリー作成後に返却するファミリー情報"
+      },
+      "SignupRequest": {
+        "title": "サインアップリクエスト",
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "Eメール",
+            "example": "tarou@example.com"
+          },
+          "password": {
+            "maxLength": 20,
+            "minLength": 8,
+            "pattern": "半角英数字記号. 数字・大文字・小文字・記号を含む. 利用可能=[~!@#${'$'}%^&*+-/.,\\{}[]();:?<>\"'_]",
+            "type": "string",
+            "description": "パスワード",
+            "example": "Password@01"
+          }
+        },
+        "description": "新規にアカウントを作成するユーザーの情報"
+      },
+      "RefreshTokenRequest": {
+        "title": "リフレッシュトークンリクエスト",
+        "required": ["refreshToken"],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTk4MWRmNC1lY2Q1LTdhNmEtOWY3Yy04ZWQ3MjYzMmNhM2YiLCJpc3MiOiJraWRwZXIiLCJpYXQiOjE3NTI4NDkyNDcsInN1YiI6InRleHRAZXhtYXBsLmNvbSIsInRva2VuVHlwZSI6IlJFRlJFU0giLCJ1c2VyRGV2aWNlSWQiOiIwMTk3ZmUzZC01N2E3LTdjYmMtYTBlNC0wM2QwMjE1ZmM1ZTQiLCJleHAiOjE3NjA2MjUyNDd9.RK4-JT9JI4Rxx2CELb3rp_TjrSlpRJAELrl8TieyCbs"
+          }
+        },
+        "description": "リフレッシュトークン"
+      },
+      "RefreshTokenResponse": {
+        "title": "リフレッシュトークンレスポンス",
+        "required": [
+          "accessToken",
+          "accessTokenExpiresIn",
+          "refreshToken",
+          "refreshTokenExpiresIn",
+          "tokenType"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "アクセストークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "accessTokenExpiresIn": {
+            "maximum": 3600000,
+            "minimum": 6000000,
+            "pattern": "半角数字",
+            "type": "integer",
+            "description": "アクセストークン有効期限",
+            "format": "int64",
+            "example": 3000
+          },
+          "refreshToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTk4MWRmNC1lY2Q1LTdhNmEtOWY3Yy04ZWQ3MjYzMmNhM2YiLCJpc3MiOiJraWRwZXIiLCJpYXQiOjE3NTI4NDkyNDcsInN1YiI6InRleHRAZXhtYXBsLmNvbSIsInRva2VuVHlwZSI6IlJFRlJFU0giLCJ1c2VyRGV2aWNlSWQiOiIwMTk3ZmUzZC01N2E3LTdjYmMtYTBlNC0wM2QwMjE1ZmM1ZTQiLCJleHAiOjE3NjA2MjUyNDd9.RK4-JT9JI4Rxx2CELb3rp_TjrSlpRJAELrl8TieyCbs"
+          },
+          "refreshTokenExpiresIn": {
+            "maximum": 7776000000,
+            "minimum": 3600000,
+            "pattern": "半角数字",
+            "type": "integer",
+            "description": "リフレッシュトークン有効期限",
+            "format": "int64",
+            "example": 7776000000
+          },
+          "tokenType": {
+            "maxLength": 6,
+            "minLength": 6,
+            "pattern": "bearer",
+            "type": "string",
+            "description": "トークンタイプ",
+            "example": "bearer"
+          }
+        },
+        "description": "新規アクセストークン"
+      },
+      "VerifyOneTimePasswordRequest": {
+        "title": "OTP検証リクエスト",
+        "required": ["email", "mfaToken", "otpCode", "userDeviceId"],
+        "type": "object",
+        "properties": {
+          "mfaToken": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "半角英数字",
+            "type": "string",
+            "description": "\n            MFAトークン\n            多要素認証トークン（Multi-Factor Authentication Token）を意味する。\n            ログインAPIで払い出されたMFAトークンを指定する。\n        ",
+            "example": "rpfVd3adFG7IX2eOQGAItJBnvU3oCDItZ31wxwcNMQlZddLQy7KxKvncOFCvn04z"
+          },
+          "email": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "Eメール",
+            "example": "tarou@example.com"
+          },
+          "otpCode": {
+            "maxLength": 6,
+            "minLength": 6,
+            "pattern": "半角数字文字列",
+            "type": "string",
+            "description": "\n            OTPコード\n            タイムベースワンタイムパスワードのコード値\n        ",
+            "example": "123456"
+          },
+          "userDeviceId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザデバイスID",
+            "example": "7df708a5-f7a0-7882-7e18-566da207bf57"
+          }
+        },
+        "description": "OTP検証する情報"
+      },
+      "VerifyOneTimePasswordResponse": {
+        "title": "OTP検証レスポンス",
+        "required": ["accessToken", "refreshToken", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザーID",
+            "example": "bf599c9c-cda1-097b-3a35-2882a78c2250"
+          },
+          "accessToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "アクセストークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "refreshToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTk4MWRmNC1lY2Q1LTdhNmEtOWY3Yy04ZWQ3MjYzMmNhM2YiLCJpc3MiOiJraWRwZXIiLCJpYXQiOjE3NTI4NDkyNDcsInN1YiI6InRleHRAZXhtYXBsLmNvbSIsInRva2VuVHlwZSI6IlJFRlJFU0giLCJ1c2VyRGV2aWNlSWQiOiIwMTk3ZmUzZC01N2E3LTdjYmMtYTBlNC0wM2QwMjE1ZmM1ZTQiLCJleHAiOjE3NjA2MjUyNDd9.RK4-JT9JI4Rxx2CELb3rp_TjrSlpRJAELrl8TieyCbs"
+          }
+        },
+        "description": "ログインしたユーザーの情報"
+      },
+      "SetupOneTimePasswordRequest": {
+        "title": "OTPセットアップリクエスト",
+        "required": ["email"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "Eメール",
+            "example": "tarou@example.com"
+          }
+        },
+        "description": "OTPセットアップ情報"
+      },
+      "SetupOneTimePasswordResponse": {
+        "title": "OTPセットアップレスポンス",
+        "required": ["account", "otpAuthUri", "secretKey"],
+        "type": "object",
+        "properties": {
+          "account": {
+            "maxLength": 300,
+            "minLength": 1,
+            "pattern": "イシュア:メールアドレス",
+            "type": "string",
+            "description": "アカウント",
+            "example": "Kidper:example@mail.com"
+          },
+          "secretKey": {
+            "maxLength": 32,
+            "minLength": 1,
+            "pattern": "Base32エンコード",
+            "type": "string",
+            "description": "秘密鍵",
+            "example": "6R7XGFLDEBBM65KHZGGQRAO2RA7Q6HEA"
+          },
+          "otpAuthUri": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "otpauth://{Type}/{Label-issuer}:{Label-アカウント名}?secret={Base32エンコードされた秘密鍵}&issuer={Issuer名}&algorithm={アルゴリズム}&digits={数字の桁数}&period={秒数}",
+            "type": "string",
+            "description": "ワンタイムパスワード認証URI",
+            "example": "otpauth://totp/Issuer:Kidper:example@mail.com?secret=6R7XGFLDEBBM65KHZGGQRAO2RA7Q6HEA&issuer=Issuer&algorithm=SHA1&digits=6&period=30"
+          }
+        },
+        "description": "OTP認証URI情報"
+      },
+      "RegisterOneTimePasswordRequest": {
+        "title": "OTP登録リクエスト",
+        "required": ["email", "otpCode"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "Eメール",
+            "example": "tarou@example.com"
+          },
+          "otpCode": {
+            "maxLength": 6,
+            "minLength": 6,
+            "pattern": "半角数字文字列",
+            "type": "string",
+            "description": "\n            OTPコード\n            タイムベースワンタイムパスワードのコード値\n        ",
+            "example": "123456"
+          }
+        },
+        "description": "OTP登録する情報"
+      },
+      "LogoutRequest": {
+        "title": "ログアウトリクエスト",
+        "required": ["accessToken", "refreshToken"],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "アクセストークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "refreshToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          }
+        },
+        "description": "ブラックリストに登録するトークン"
+      },
+      "LoginRequest": {
+        "title": "ログインリクエスト",
+        "required": ["loginId", "password", "userDeviceId"],
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "ログインID",
+            "example": "tarou@example.com"
+          },
+          "password": {
+            "maxLength": 20,
+            "minLength": 8,
+            "pattern": "半角英数字",
+            "type": "string",
+            "description": "パスワード",
+            "example": "Password@01"
+          },
+          "userDeviceId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザデバイスID",
+            "example": "7df708a5-f7a0-7882-7e18-566da207bf57"
+          }
+        },
+        "description": "ログインするユーザー情報"
+      },
+      "LoginResponse": {
+        "title": "ログインレスポンス",
+        "required": ["mfaToken"],
+        "type": "object",
+        "properties": { "mfaToken": { "type": "string" } },
+        "description": "ログイン後の認証に用いるアクセストークンとリフレッシュトークン"
+      },
+      "UserActivateRequest": {
+        "title": "ユーザーアクティベートリクエスト",
+        "required": ["email", "userDeviceId"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字. メールアドレス形式",
+            "type": "string",
+            "description": "Eメール",
+            "example": "tarou@example.com"
+          },
+          "userDeviceId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザデバイスID",
+            "example": "7df708a5-f7a0-7882-7e18-566da207bf57"
+          }
+        },
+        "description": "各種認証後のアクティベートするユーザーの情報"
+      },
+      "UserActivateResponse": {
+        "title": "ユーザーアクティベートレスポンス",
+        "required": ["accessToken", "recoveryCodes", "refreshToken", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザID",
+            "example": "0cc111e5-7124-a974-911a-d2c940707d2a"
+          },
+          "recoveryCodes": {
+            "maxLength": 208,
+            "minLength": 208,
+            "pattern": "16進数文字列5桁-16進数文字列5桁",
+            "type": "array",
+            "description": "リカバリーコードリスト",
+            "example": "[\"6ee46-42cf4\",\"ffc67-c7424\",\"b1402-49a44\",\"469bb-c4853\",\"df007-66ac8\",\"cbe4c-37d2b\",\"5f377-aa95c\",\"27287-a05e3\",\"d598d-c306d\",\"86315-0d849\",\"6c8a3-54f0a\",\"9d485-44d4c\",\"a6614-95bcf\",\"f61a1-f8c48\",\"5182a-d88a7\",\"295d0-ed7e4\"",
+            "items": {
+              "maxLength": 208,
+              "minLength": 208,
+              "pattern": "16進数文字列5桁-16進数文字列5桁",
+              "type": "string",
+              "description": "リカバリーコードリスト",
+              "example": "[\"6ee46-42cf4\",\"ffc67-c7424\",\"b1402-49a44\",\"469bb-c4853\",\"df007-66ac8\",\"cbe4c-37d2b\",\"5f377-aa95c\",\"27287-a05e3\",\"d598d-c306d\",\"86315-0d849\",\"6c8a3-54f0a\",\"9d485-44d4c\",\"a6614-95bcf\",\"f61a1-f8c48\",\"5182a-d88a7\",\"295d0-ed7e4\""
+            }
+          },
+          "accessToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "アクセストークン",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "refreshToken": {
+            "maxLength": 3000,
+            "minLength": 100,
+            "pattern": "JWT",
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTk4MWRmNC1lY2Q1LTdhNmEtOWY3Yy04ZWQ3MjYzMmNhM2YiLCJpc3MiOiJraWRwZXIiLCJpYXQiOjE3NTI4NDkyNDcsInN1YiI6InRleHRAZXhtYXBsLmNvbSIsInRva2VuVHlwZSI6IlJFRlJFU0giLCJ1c2VyRGV2aWNlSWQiOiIwMTk3ZmUzZC01N2E3LTdjYmMtYTBlNC0wM2QwMjE1ZmM1ZTQiLCJleHAiOjE3NjA2MjUyNDd9.RK4-JT9JI4Rxx2CELb3rp_TjrSlpRJAELrl8TieyCbs"
+          }
+        },
+        "description": "アクティベートしたユーザーの情報"
+      },
+      "EmailActivateRequest": {
+        "title": "メールアドレスアクティベートリクエスト",
+        "required": ["activateToken"],
+        "type": "object",
+        "properties": {
+          "activateToken": {
+            "maxLength": 255,
+            "minLength": 255,
+            "pattern": "半角英数字",
+            "type": "string",
+            "description": "アクティベートトークン",
+            "example": "JsfTRfB6AS5QaqpUoFcnENJaTUFDdREcQ50OXgDn0YgCXAOxLGAeYWcNUnwpfNCGWoOoFBXxhG6TQofnqHxmILRHWiHJUhlba3rbbKDdILPbwA6DaYJWtdUlEhvdggJJbIpHE7aXnSjUTIpvQd275MMEu1chT82qVcIBGWUFPWqdPqWF3kS3k2WdPuJW4t22DPJssqUxDiS86TTIpBS7i7g1LVtfeo3jBgd6prGkR7IuFT71Kok6106oxlJNeqd"
+          }
+        },
+        "description": "サインアップ後のメールアドレス認証によってアクティベートするトークン"
+      },
+      "HealthDevelopResponse": {
+        "title": "開発用ヘルスチェック",
+        "required": ["description", "result"],
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "結果",
+            "example": "OK"
+          },
+          "description": {
+            "type": "string",
+            "description": "説明",
+            "example": "開発用ヘルスチェックエンドポイント"
+          }
+        },
+        "description": "ヘルスチェックの結果を保持"
+      },
+      "AuthTokenDevelopResponse": {
+        "title": "開発用認証情報",
+        "required": ["accessToken", "refreshToken", "userDeviceId", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ユーザーID",
+            "example": "9812413a-e52c-4aea-b213-0e91d97fdc21"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "アクセストークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTljMTgyYS0yZTczLTdkNTMtYmEzMy1lZTZiMGUzOWU1NDEiLCJpc3MiOiJLaWRwZXIiLCJpYXQiOjE3Njk5MzE5NDMsInN1YiI6InVzZXJAZXhhbXBsZS5jb20iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJ1c2VyRGV2aWNlSWQiOiIwZTUzOWM3OC02NzA5LWFlMmQtZjBjMy03NmU0YzFjOTcxNmUiLCJleHAiOjE3Nzc3MDc5NDN9.IGVc6fNj36SdvFMNDOLEHARJzm58rcsurd59jM1qG-g"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "リフレッシュトークン",
+            "example": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMTljMTgyYS0yZTdkLTczM2ItODlmYy05ZjE2YTI3ZDVjOWEiLCJpc3MiOiJLaWRwZXIiLCJpYXQiOjE3Njk5MzE5NDMsInN1YiI6InVzZXJAZXhhbXBsZS5jb20iLCJ0b2tlblR5cGUiOiJSRUZSRVNIIiwidXNlckRldmljZUlkIjoiMGU1MzljNzgtNjcwOS1hZTJkLWYwYzMtNzZlNGMxYzk3MTZlIiwiZXhwIjoxNzc3NzA3OTQzfQ.vIU8hcjSzXEzeIJYxdbXjpHNIxWnUtppyr32B6obk6E"
+          },
+          "userDeviceId": {
+            "type": "string",
+            "description": "ユーザーデバイスID",
+            "example": "0e539c78-6709-ae2d-f0c3-76e4c1c9716e"
+          }
+        },
+        "description": "ユーザーの認証情報"
+      },
+      "FamilyDto": {
+        "required": ["childIds", "familyId", "familyMemberIds"],
+        "type": "object",
+        "properties": {
+          "familyId": { "type": "string" },
+          "familyMemberIds": { "type": "array", "items": { "type": "string" } },
+          "childIds": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "UserViewResponse": {
+        "required": ["families", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "families": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FamilyDto" }
+          }
+        }
+      },
+      "ContentDetail": {
+        "title": "コンテンツ情報",
+        "required": [
+          "contentId",
+          "contentMediaType",
+          "contentTakenAt",
+          "contentType",
+          "contentUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "コンテンツID",
+            "example": "a1aadd34-9807-f10f-988e-0f8a4a6e18d9"
+          },
+          "contentType": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "\n            PHOTO=写真 or \n            VIDEO=動画\n        ",
+            "type": "string",
+            "description": "コンテントタイプ",
+            "example": "PHOTO"
+          },
+          "contentMediaType": {
+            "type": "string",
+            "description": "\n            メディアタイプ\n                - image/jpeg\n                - image/png\n                - image/webp\n                - video/mp4\n                - video/quicktime\n                - video/webm\n        ",
+            "example": "image/jpeg"
+          },
+          "contentUrl": {
+            "maxLength": 4096,
+            "minLength": 300,
+            "pattern": "URL",
+            "type": "string",
+            "description": "\n            コンテンツ取得用URL。\n            バイナリデータのコンテンツを取得できる。\n        ",
+            "example": "https://example.com/api/v1/contents/ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"
+          },
+          "contentTakenAt": {
+            "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+            "type": "string",
+            "description": "コンテンツ撮影日時",
+            "format": "date-time"
+          }
+        },
+        "description": "コンテンツの詳細情報"
+      },
+      "FindPostResponse": {
+        "title": "ポスト取得レスポンス",
+        "required": [
+          "childId",
+          "contentDetail",
+          "contentPublishScope",
+          "createUserId",
+          "createdAt",
+          "familyId",
+          "postId",
+          "publishStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "postId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ポストID",
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          },
+          "publishStatus": {
+            "pattern": "DRAFT|PUBLISHED|UNPUBLISHED",
+            "type": "string",
+            "description": "\n            公開ステータス\n            - DRAFT: 未公開（下書き）\n            - PUBLISHED: 公開（公開中）\n            - UNPUBLISHED: 非公開\n        ",
+            "example": "PUBLISHED"
+          },
+          "contentPublishScope": {
+            "pattern": "ADMIN|ALL",
+            "type": "string",
+            "description": "\n            コンテンツ公開範囲\n            - ADMIN: 管理者のみ\n            - ALL: 全員\n        ",
+            "example": "ADMIN"
+          },
+          "contentDetail": { "$ref": "#/components/schemas/ContentDetail" },
+          "createUserId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "作成ユーザーID",
+            "example": "bf599c9c-cda1-097b-3a35-2882a78c2250"
+          },
+          "childId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "子どもID",
+            "example": "7b9175b7-16e9-4c8c-8b16-16c9bbab6efa"
+          },
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          },
+          "createdAt": {
+            "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+            "type": "string",
+            "description": "作成日時",
+            "format": "date-time"
+          }
+        },
+        "description": "取得したポスト情報"
+      },
+      "MeChildDto": {
+        "required": ["birthday", "childId", "childName", "sex"],
+        "type": "object",
+        "properties": {
+          "childId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "子どもID",
+            "example": "7b9175b7-16e9-4c8c-8b16-16c9bbab6efa"
+          },
+          "childName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "子ども名",
+            "example": "たろう"
+          },
+          "sex": {
+            "pattern": "MALE|FEMALE",
+            "type": "string",
+            "description": "\n            性別\n            - MALE: 男性\n            - FEMALE: 女性\n        ",
+            "example": "MALE"
+          },
+          "birthday": {
+            "maxLength": 10,
+            "minLength": 10,
+            "pattern": "yyyy-MM-dd",
+            "type": "string",
+            "description": "生年月日",
+            "example": "2025-06-08"
+          }
+        },
+        "description": "子どもリスト"
+      },
+      "MeFamilyDto": {
+        "required": ["children", "familyId", "familyMembers", "familyName"],
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          },
+          "familyName": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ファミリー名",
+            "example": "たなか"
+          },
+          "familyMembers": {
+            "type": "array",
+            "description": "ファミリーメンバーリスト",
+            "items": { "$ref": "#/components/schemas/MeFamilyMemberDto" }
+          },
+          "children": {
+            "type": "array",
+            "description": "子どもリスト",
+            "items": { "$ref": "#/components/schemas/MeChildDto" }
+          }
+        },
+        "description": "ファミリーリスト"
+      },
+      "MeFamilyMemberDto": {
+        "required": ["familyMemberRoleType", "nickname", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザID",
+            "example": "0cc111e5-7124-a974-911a-d2c940707d2a"
+          },
+          "nickname": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ニックネーム",
+            "example": "パパ"
+          },
+          "familyMemberRoleType": {
+            "pattern": "ADMIN or VIEWER",
+            "type": "string",
+            "description": "ファミリーメンバー権限",
+            "example": "ADMIN"
+          }
+        },
+        "description": "ファミリーメンバーリスト"
+      },
+      "MeFamilyResponse": {
+        "title": "ポスト登録リクエスト",
+        "required": ["families", "userId"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザID",
+            "example": "0cc111e5-7124-a974-911a-d2c940707d2a"
+          },
+          "families": {
+            "type": "array",
+            "description": "ファミリーリスト",
+            "items": { "$ref": "#/components/schemas/MeFamilyDto" }
+          }
+        },
+        "description": "登録するポスト情報"
+      },
+      "FindFamilyInvitationCodeResponse": {
+        "title": "招待取得レスポンス",
+        "required": [
+          "createdAt",
+          "expiry",
+          "familyId",
+          "familyMemberRoleType",
+          "hostUserId",
+          "invitationCode"
+        ],
+        "type": "object",
+        "properties": {
+          "invitationCode": {
+            "maxLength": 20,
+            "minLength": 20,
+            "pattern": "半角数字",
+            "type": "string",
+            "description": "ファミリー招待コード",
+            "example": "01234567890123456789"
+          },
+          "hostUserId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザーID",
+            "example": "bf599c9c-cda1-097b-3a35-2882a78c2250"
+          },
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"
+          },
+          "familyMemberRoleType": {
+            "pattern": "ADMIN|VIEWER",
+            "type": "string",
+            "description": "\n            ファミリーメンバー権限\n            - ADMIN: 管理者\n            - VIEWER: 閲覧者\n        ",
+            "example": "ADMIN"
+          },
+          "expiry": {
+            "maxLength": 20,
+            "minLength": 20,
+            "pattern": "半角数字",
+            "type": "integer",
+            "description": "有効期限",
+            "format": "int64",
+            "example": 259200
+          },
+          "createdAt": {
+            "maxLength": 26,
+            "minLength": 26,
+            "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+            "type": "string",
+            "description": "作成日時",
+            "format": "date-time"
+          }
+        },
+        "description": "取得するファミリー招待の情報"
+      },
+      "FindListPostResponse": {
+        "title": "ポスト一覧取得レスポンス",
+        "required": ["posts"],
+        "type": "object",
+        "properties": {
+          "posts": {
+            "type": "array",
+            "description": "ポストのリスト",
+            "items": { "$ref": "#/components/schemas/FindPostResponse" }
+          },
+          "nextCursor": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "\n            次のページを取得するためのカーソル。\n            これ以上取得するデータがない場合はnull\n        ",
+            "nullable": true,
+            "example": "4e17a057-0896-8a84-af21-05eebd0c272d"
+          }
+        },
+        "description": "取得したポスト一覧情報"
+      },
+      "FamilyMemberDto": {
+        "title": "ファミリーメンバー情報",
+        "required": [
+          "familyMemberId",
+          "familyMemberRoleType",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "familyMemberId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーメンバーID",
+            "example": "288584b7-acee-dc5b-51ec-8d0f265c39d4"
+          },
+          "userId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ユーザID",
+            "example": "0cc111e5-7124-a974-911a-d2c940707d2a"
+          },
+          "nickname": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string",
+            "description": "ニックネーム",
+            "example": "パパ"
+          },
+          "familyMemberRoleType": {
+            "pattern": "ADMIN or VIEWER",
+            "type": "string",
+            "description": "ファミリーメンバー権限",
+            "example": "ADMIN"
+          }
+        },
+        "description": "ファミリーメンバー情報"
+      },
+      "FindFamilyMembersResponse": {
+        "title": "ファミリーメンバー取得レスポンス",
+        "required": ["familyId", "familyMembers"],
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "UUID",
+            "type": "string",
+            "description": "ファミリーID",
+            "example": "37337fc0-cc76-22b6-f0a2-3328be4fa8e3"
+          },
+          "familyMembers": {
+            "type": "array",
+            "description": "ファミリーメンバー",
+            "items": { "$ref": "#/components/schemas/FamilyMemberDto" }
+          }
+        },
+        "description": "全てのファミリーメンバーの情報を返す"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "in": "header",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

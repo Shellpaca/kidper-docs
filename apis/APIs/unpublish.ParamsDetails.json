@@ -1,0 +1,1 @@
+{"parameters":[{"name":"Idempotency-Key","in":"header","required":true,"schema":{"type":"string"}},{"name":"postId","in":"path","description":"ポストID","required":true,"schema":{"maxLength":36,"minLength":36,"pattern":"UUID","type":"string","description":"ポストID","example":"4e17a057-0896-8a84-af21-05eebd0c272d"},"example":"4e17a057-0896-8a84-af21-05eebd0c272d"}]}

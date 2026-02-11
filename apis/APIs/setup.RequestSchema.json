@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"title":"OTPセットアップリクエスト","required":["email"],"type":"object","properties":{"email":{"maxLength":255,"minLength":255,"pattern":"半角英数字. メールアドレス形式","type":"string","description":"Eメール","example":"tarou@example.com"}},"description":"OTPセットアップ情報"}}},"required":true}}

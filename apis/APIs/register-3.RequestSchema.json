@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"title":"ファミリー作成リクエスト","required":["familyName"],"type":"object","properties":{"familyName":{"maxLength":20,"minLength":1,"type":"string","description":"ファミリー名","example":"たなか"}},"description":"ファミリーを作成する際に必要な情報"}}},"required":true}}

@@ -1,17 +1,17 @@
-import clsx from "clsx";
-import Heading from "@theme/Heading";
-import styles from "./styles.module.css";
+import clsx from 'clsx'
+import Heading from '@theme/Heading'
+import styles from './styles.module.css'
 
 type FeatureItem = {
-  title: string;
-  Svg: React.ComponentType<React.ComponentProps<"svg">>;
-  description: JSX.Element;
-};
+  title: string
+  Svg: React.ComponentType<React.ComponentProps<'svg'>>
+  description: JSX.Element
+}
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "成長を記録",
-    Svg: require("@site/static/img/fatherhood.svg").default,
+    title: '成長を記録',
+    Svg: require('@site/static/img/fatherhood.svg').default,
     description: (
       <>
         今日、撮った子どもの写真をアルバムにして残したい。みんなで写真を見て思い出を話したい。
@@ -20,8 +20,8 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: "家族に共有",
-    Svg: require("@site/static/img/family.svg").default,
+    title: '家族に共有',
+    Svg: require('@site/static/img/family.svg').default,
     description: (
       <>
         撮った写真やアルバムを家族に共有してみてもらいたい。家族に見守っていて欲しい。
@@ -29,19 +29,19 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: "オープンソース",
-    Svg: require("@site/static/img/children.svg").default,
+    title: 'オープンソース',
+    Svg: require('@site/static/img/children.svg').default,
     description: (
       <>
         無制限に写真を残したい。お金をできるだけかけたくない。外部のアプリケーションに管理されたくない。
       </>
     ),
   },
-];
+]
 
 function Feature({ title, Svg, description }: FeatureItem) {
   return (
-    <div className={clsx("col col--4")}>
+    <div className={clsx('col col--4')}>
       <div className="text--center">
         <Svg className={styles.featureSvg} role="img" />
       </div>
@@ -50,7 +50,7 @@ function Feature({ title, Svg, description }: FeatureItem) {
         <p>{description}</p>
       </div>
     </div>
-  );
+  )
 }
 
 export default function HomepageFeatures(): JSX.Element {
@@ -64,5 +64,5 @@ export default function HomepageFeatures(): JSX.Element {
         </div>
       </div>
     </section>
-  );
+  )
 }

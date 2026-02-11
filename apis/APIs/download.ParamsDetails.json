@@ -1,0 +1,1 @@
+{"parameters":[{"name":"contentId","in":"path","description":"コンテントID","required":true,"schema":{"maxLength":36,"minLength":36,"pattern":"UUID","type":"string","description":"コンテントID","example":"ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"},"example":"ab5fa9a6-7a72-8b1b-a051-df6e54a7b485"},{"name":"token","in":"query","required":true,"schema":{"type":"string"}}]}

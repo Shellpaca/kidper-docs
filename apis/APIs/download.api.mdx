@@ -1,0 +1,73 @@
+---
+id: download
+title: "コンテンツファイルダウンロードAPI"
+description: "            コンテンツファイルダウンロードする"
+sidebar_label: "コンテンツファイルダウンロードAPI"
+hide_title: true
+hide_table_of_contents: true
+api: eJztmVtPG0cUx7+KNY+RXa/NNftG01C5iVrUBPWB8jD2Dngbe2eZHdNQZMk7mzZQQG0Rl1CaJqhpoBCMKqKWQAUfZrAdvkV0xhe8Nk2cRkGqtH5YX2bmzJnzP79jr8804njcQfoIkmJfevvS+05d76HRMDKIk2KmzU1qIR19aYWaHi3TpbcsxYYUT6S3I72CFE/V57vS+0d6s9Jdk2LutQZKP6yUjleluzecqCxtSXdHettS/AUWxaF0l6WYl+5T6d6TYk6687Lg+s2Vf3k2MJSQ7p4U22rpgfS+B2fcos83sXiRe5vSXQDDBXFuFYURtQnDcPyEgXRk0K+tDMUGCiMbM5wlnDAI3TSycJYgHaWoxYnFEzDDhJDZmKdRaxz9B59JfITCiJGJnMmIgXTOciSMnFSaZDHSp1EW371JrHGeRnpXbxhlTav5rY05JwysDg8rQ3zKBk8czkxrvKOtyV2ctTOwCCd7xvBV3Bvpw33xSH8yloxgrScWMcZ6SU837kt29/eg/H9Y0QgQp3eIVQ/ORI6wqdee3X+YfH4UJjs2tRziwHhc0+DJf8bPbqBwXQkYvRK9Ak//ZjWMxijLYo50lJziBOXz+XwYdV9k+UNshD4nEzni8DdtYXIVn7OVucraIeSz2JLeHyrbnknxQnoPQQHxwnf8EZQljoPHCeioLIw2BKXJr0gKtrUZJCU3qxGobdR+qFbdT1T6z0hvxye538F9YMF7qKZCfoDYdZfeuMfp8VzpyYp0i5Wt4tnGr9Jdki5wXFo/LBV/VhhuSM+T4gjCIA6kWHx5slRaeF4tDj63FMnzZW9frVytge9uwxXY3gN3IYwz0p0/K7hSzKr6cKwmP5IFgUDF1iDUNCh735Ye/9lQOtau9LCFczxNmfkNMTqUukOFCWOUXaMGaNysdpY4HGftt1G+vqRj9R+DX+JEabsqC6I5/JX156XZBekWy2uiNHPkUyOuxbsjWiyixW7H4rqm6Zr2QSzeBdnxrvnXoubpwUJ59zdVYxpx6sB4PfJQ3aCe+7c4H158ufugNPN79cTns//PWQ72UqTmXWfOK+AfVYr3y7MFcPg8cX2et+j0k5q0ocZO4OrOS+9H8NO7rz78W3qbkFruZvM2b8FhVzuHg5QlTcNQ3xkBhAGEAYTvG8Ludgg/pTw0SHNW8E0YQBhAeBkQXm2H8Bq1xjJmqtMbj4DBgMGAwXdgMB6/6K7QZjQF2iQzJHTd4iafCngMeAx4vAQeL7g7vElTd4L/ZwICAwIvgcCei/4RT1jQfcCZ0C3CJgkLXYesCIAMgAyAfM9AKgl4mkJfcpyobIdeo46i2Dajk7FoDUEnOt3oSub1pg6mo4itti9zLIN0lObc1qPRDE3hTJo6XO/XNK0tJB8TC3qixAhVLYRgMXTmHJLKMfhFDBaTBDPCBnLg0sho8/AtKARVIpsnNZQAL+odwjTBBoF6oqoHjFaXoHDtxWC9dffJF7dV4ExrjDYXmRumYRMWGhhKtB2kOjQwlDg9Wi5vPiivg4AQkurwZAzl868A+Vu7vA==
+sidebar_class_name: "get api-method"
+info_path: apis/APIs/kidper-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"コンテンツファイルダウンロードAPI"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/api/v1/contents/{contentId}:download"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+
+            コンテンツファイルダウンロードする
+            コンテンツ取得はUI用にリザイズされているが、
+            本APIはオリジナルのファイルをダウンロードできる。
+        
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./download.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./download.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./download.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

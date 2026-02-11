@@ -1,0 +1,7 @@
+{
+  "label": "Swagger UI",
+  "link": {
+    "type": "generated-index",
+    "description": "全てのAPIを Swagger UI で確認する"
+  }
+}

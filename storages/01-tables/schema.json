@@ -1,0 +1,2670 @@
+{
+  "name": "library",
+  "tables": [
+    {
+      "name": "child_members",
+      "type": "BASE TABLE",
+      "comment": "子どもメンバーTBL",
+      "columns": [
+        {
+          "name": "child_member_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "子どもメンバーID"
+        },
+        {
+          "name": "child_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "子どもID"
+        },
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "child_id",
+          "def": "KEY child_id (child_id) USING BTREE",
+          "table": "child_members",
+          "columns": ["child_id"]
+        },
+        {
+          "name": "family_id",
+          "def": "KEY family_id (family_id) USING BTREE",
+          "table": "child_members",
+          "columns": ["family_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (child_member_id) USING BTREE",
+          "table": "child_members",
+          "columns": ["child_member_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "child_members_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (child_id) REFERENCES children (child_id)",
+          "table": "child_members",
+          "referenced_table": "children",
+          "columns": ["child_id"],
+          "referenced_columns": ["child_id"]
+        },
+        {
+          "name": "child_members_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)",
+          "table": "child_members",
+          "referenced_table": "families",
+          "columns": ["family_id"],
+          "referenced_columns": ["family_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (child_member_id)",
+          "table": "child_members",
+          "columns": ["child_member_id"]
+        }
+      ],
+      "def": "CREATE TABLE `child_members` (\n  `child_member_id` varchar(36) NOT NULL COMMENT '子どもメンバーID',\n  `child_id` varchar(36) NOT NULL COMMENT '子どもID',\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`child_member_id`),\n  KEY `child_id` (`child_id`),\n  KEY `family_id` (`family_id`),\n  CONSTRAINT `child_members_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `children` (`child_id`),\n  CONSTRAINT `child_members_ibfk_2` FOREIGN KEY (`family_id`) REFERENCES `families` (`family_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='子どもメンバーTBL'"
+    },
+    {
+      "name": "children",
+      "type": "BASE TABLE",
+      "comment": "子どもTBL",
+      "columns": [
+        {
+          "name": "child_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "子どもID"
+        },
+        {
+          "name": "child_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "子ども名"
+        },
+        {
+          "name": "sex_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "性別ID"
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": false,
+          "comment": "生年月日"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sex_id",
+          "def": "KEY sex_id (sex_id) USING BTREE",
+          "table": "children",
+          "columns": ["sex_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (child_id) USING BTREE",
+          "table": "children",
+          "columns": ["child_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "children_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (sex_id) REFERENCES sex (sex_id)",
+          "table": "children",
+          "referenced_table": "sex",
+          "columns": ["sex_id"],
+          "referenced_columns": ["sex_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (child_id)",
+          "table": "children",
+          "columns": ["child_id"]
+        }
+      ],
+      "def": "CREATE TABLE `children` (\n  `child_id` varchar(36) NOT NULL COMMENT '子どもID',\n  `child_name` varchar(100) NOT NULL COMMENT '子ども名',\n  `sex_id` int NOT NULL COMMENT '性別ID',\n  `birthday` date NOT NULL COMMENT '生年月日',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`child_id`),\n  KEY `sex_id` (`sex_id`),\n  CONSTRAINT `children_ibfk_1` FOREIGN KEY (`sex_id`) REFERENCES `sex` (`sex_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='子どもTBL'"
+    },
+    {
+      "name": "content_blacklists",
+      "type": "BASE TABLE",
+      "comment": "コンテントブラックリストTBL",
+      "columns": [
+        {
+          "name": "content_blacklist_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "コンテントブラックリストID"
+        },
+        {
+          "name": "checksum",
+          "type": "char(40)",
+          "nullable": false,
+          "comment": "チェックサム"
+        },
+        {
+          "name": "original_file_name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "元のファイル名"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "content_blacklists",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_blacklist_id) USING BTREE",
+          "table": "content_blacklists",
+          "columns": ["content_blacklist_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "content_blacklists_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "content_blacklists",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_blacklist_id)",
+          "table": "content_blacklists",
+          "columns": ["content_blacklist_id"]
+        }
+      ],
+      "def": "CREATE TABLE `content_blacklists` (\n  `content_blacklist_id` varchar(36) NOT NULL COMMENT 'コンテントブラックリストID',\n  `checksum` char(40) NOT NULL COMMENT 'チェックサム',\n  `original_file_name` varchar(255) NOT NULL COMMENT '元のファイル名',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`content_blacklist_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `content_blacklists_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテントブラックリストTBL'"
+    },
+    {
+      "name": "content_media_type",
+      "type": "BASE TABLE",
+      "comment": "コンテントメディアタイプマスターTBL",
+      "columns": [
+        {
+          "name": "content_media_type_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "コンテントメディアタイプID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "コンテントメディアタイプ名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_media_type_id) USING BTREE",
+          "table": "content_media_type",
+          "columns": ["content_media_type_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "content_media_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "content_media_type",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "content_media_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "content_media_type",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_media_type_id)",
+          "table": "content_media_type",
+          "columns": ["content_media_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `content_media_type` (\n  `content_media_type_id` int NOT NULL AUTO_INCREMENT COMMENT 'コンテントメディアタイプID',\n  `name` varchar(100) NOT NULL COMMENT 'コンテントメディアタイプ名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`content_media_type_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテントメディアタイプマスターTBL'"
+    },
+    {
+      "name": "content_publish_scope",
+      "type": "BASE TABLE",
+      "comment": "コンテント公開範囲タイプマスターTBL",
+      "columns": [
+        {
+          "name": "content_publish_scope_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテント公開範囲ID"
+        },
+        {
+          "name": "content_publish_scope_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "コンテント公開範囲名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_publish_scope_id) USING BTREE",
+          "table": "content_publish_scope",
+          "columns": ["content_publish_scope_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "content_publish_scope",
+          "columns": ["explanation"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "content_publish_scope",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_publish_scope_id)",
+          "table": "content_publish_scope",
+          "columns": ["content_publish_scope_id"]
+        }
+      ],
+      "def": "CREATE TABLE `content_publish_scope` (\n  `content_publish_scope_id` int NOT NULL COMMENT 'コンテント公開範囲ID',\n  `content_publish_scope_name` varchar(100) NOT NULL COMMENT 'コンテント公開範囲名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`content_publish_scope_id`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテント公開範囲タイプマスターTBL'"
+    },
+    {
+      "name": "content_publish_scope_members",
+      "type": "BASE TABLE",
+      "comment": "コンテント公開範囲メンバーTBL",
+      "columns": [
+        {
+          "name": "content_publish_scope_member_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "コンテント公開範囲メンバーID"
+        },
+        {
+          "name": "content_publish_scope_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテント公開範囲ID"
+        },
+        {
+          "name": "content_publish_scope_member",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "コンテント公開範囲メンバー"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "content_publish_scope_id",
+          "def": "KEY content_publish_scope_id (content_publish_scope_id) USING BTREE",
+          "table": "content_publish_scope_members",
+          "columns": ["content_publish_scope_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_publish_scope_member_id) USING BTREE",
+          "table": "content_publish_scope_members",
+          "columns": ["content_publish_scope_member_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "content_publish_scope_members_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (content_publish_scope_id) REFERENCES content_publish_scope (content_publish_scope_id)",
+          "table": "content_publish_scope_members",
+          "referenced_table": "content_publish_scope",
+          "columns": ["content_publish_scope_id"],
+          "referenced_columns": ["content_publish_scope_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_publish_scope_member_id)",
+          "table": "content_publish_scope_members",
+          "columns": ["content_publish_scope_member_id"]
+        }
+      ],
+      "def": "CREATE TABLE `content_publish_scope_members` (\n  `content_publish_scope_member_id` int NOT NULL AUTO_INCREMENT COMMENT 'コンテント公開範囲メンバーID',\n  `content_publish_scope_id` int NOT NULL COMMENT 'コンテント公開範囲ID',\n  `content_publish_scope_member` varchar(36) NOT NULL COMMENT 'コンテント公開範囲メンバー',\n  PRIMARY KEY (`content_publish_scope_member_id`),\n  KEY `content_publish_scope_id` (`content_publish_scope_id`),\n  CONSTRAINT `content_publish_scope_members_ibfk_1` FOREIGN KEY (`content_publish_scope_id`) REFERENCES `content_publish_scope` (`content_publish_scope_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテント公開範囲メンバーTBL'"
+    },
+    {
+      "name": "content_type",
+      "type": "BASE TABLE",
+      "comment": "コンテントタイプマスターTBL",
+      "columns": [
+        {
+          "name": "content_type_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "コンテントタイプID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "コンテントタイプ名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_type_id) USING BTREE",
+          "table": "content_type",
+          "columns": ["content_type_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "content_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "content_type",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "content_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "content_type",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_type_id)",
+          "table": "content_type",
+          "columns": ["content_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `content_type` (\n  `content_type_id` int NOT NULL AUTO_INCREMENT COMMENT 'コンテントタイプID',\n  `name` varchar(100) NOT NULL COMMENT 'コンテントタイプ名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`content_type_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテントタイプマスターTBL'"
+    },
+    {
+      "name": "contents",
+      "type": "BASE TABLE",
+      "comment": "コンテントTBL",
+      "columns": [
+        {
+          "name": "content_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "コンテントID"
+        },
+        {
+          "name": "content_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテントタイプID"
+        },
+        {
+          "name": "checksum",
+          "type": "char(40)",
+          "nullable": false,
+          "comment": "チェックサム"
+        },
+        {
+          "name": "content_media_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテントメディアタイプID"
+        },
+        {
+          "name": "content_file_size",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテントファイルサイズ"
+        },
+        {
+          "name": "content_file_name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "コンテントファイル名"
+        },
+        {
+          "name": "original_file_name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "元のファイル名"
+        },
+        {
+          "name": "content_path",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "コンテントパス"
+        },
+        {
+          "name": "content_taken_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "コンテント撮影日"
+        },
+        {
+          "name": "create_user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "作成ユーザーID"
+        },
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "content_media_type_id",
+          "def": "KEY content_media_type_id (content_media_type_id) USING BTREE",
+          "table": "contents",
+          "columns": ["content_media_type_id"]
+        },
+        {
+          "name": "content_type_id",
+          "def": "KEY content_type_id (content_type_id) USING BTREE",
+          "table": "contents",
+          "columns": ["content_type_id"]
+        },
+        {
+          "name": "create_user_id",
+          "def": "KEY create_user_id (create_user_id) USING BTREE",
+          "table": "contents",
+          "columns": ["create_user_id"]
+        },
+        {
+          "name": "family_id",
+          "def": "KEY family_id (family_id) USING BTREE",
+          "table": "contents",
+          "columns": ["family_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (content_id) USING BTREE",
+          "table": "contents",
+          "columns": ["content_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "contents_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (content_type_id) REFERENCES content_type (content_type_id)",
+          "table": "contents",
+          "referenced_table": "content_type",
+          "columns": ["content_type_id"],
+          "referenced_columns": ["content_type_id"]
+        },
+        {
+          "name": "contents_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (content_media_type_id) REFERENCES content_media_type (content_media_type_id)",
+          "table": "contents",
+          "referenced_table": "content_media_type",
+          "columns": ["content_media_type_id"],
+          "referenced_columns": ["content_media_type_id"]
+        },
+        {
+          "name": "contents_ibfk_3",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)",
+          "table": "contents",
+          "referenced_table": "users",
+          "columns": ["create_user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "contents_ibfk_4",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)",
+          "table": "contents",
+          "referenced_table": "families",
+          "columns": ["family_id"],
+          "referenced_columns": ["family_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (content_id)",
+          "table": "contents",
+          "columns": ["content_id"]
+        }
+      ],
+      "def": "CREATE TABLE `contents` (\n  `content_id` varchar(36) NOT NULL COMMENT 'コンテントID',\n  `content_type_id` int NOT NULL COMMENT 'コンテントタイプID',\n  `checksum` char(40) NOT NULL COMMENT 'チェックサム',\n  `content_media_type_id` int NOT NULL COMMENT 'コンテントメディアタイプID',\n  `content_file_size` int NOT NULL COMMENT 'コンテントファイルサイズ',\n  `content_file_name` varchar(255) NOT NULL COMMENT 'コンテントファイル名',\n  `original_file_name` varchar(255) NOT NULL COMMENT '元のファイル名',\n  `content_path` varchar(255) NOT NULL COMMENT 'コンテントパス',\n  `content_taken_at` datetime(6) NOT NULL COMMENT 'コンテント撮影日',\n  `create_user_id` varchar(36) NOT NULL COMMENT '作成ユーザーID',\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`content_id`),\n  KEY `content_type_id` (`content_type_id`),\n  KEY `content_media_type_id` (`content_media_type_id`),\n  KEY `create_user_id` (`create_user_id`),\n  KEY `family_id` (`family_id`),\n  CONSTRAINT `contents_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `content_type` (`content_type_id`),\n  CONSTRAINT `contents_ibfk_2` FOREIGN KEY (`content_media_type_id`) REFERENCES `content_media_type` (`content_media_type_id`),\n  CONSTRAINT `contents_ibfk_3` FOREIGN KEY (`create_user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `contents_ibfk_4` FOREIGN KEY (`family_id`) REFERENCES `families` (`family_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテントTBL'"
+    },
+    {
+      "name": "families",
+      "type": "BASE TABLE",
+      "comment": "ファミリーTBL",
+      "columns": [
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "family_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "ファミリー名"
+        },
+        {
+          "name": "create_user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "作成ユーザーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "create_user_id",
+          "def": "KEY create_user_id (create_user_id) USING BTREE",
+          "table": "families",
+          "columns": ["create_user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (family_id) USING BTREE",
+          "table": "families",
+          "columns": ["family_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "families_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)",
+          "table": "families",
+          "referenced_table": "users",
+          "columns": ["create_user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (family_id)",
+          "table": "families",
+          "columns": ["family_id"]
+        }
+      ],
+      "def": "CREATE TABLE `families` (\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `family_name` varchar(100) NOT NULL COMMENT 'ファミリー名',\n  `create_user_id` varchar(36) NOT NULL COMMENT '作成ユーザーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`family_id`),\n  KEY `create_user_id` (`create_user_id`),\n  CONSTRAINT `families_ibfk_1` FOREIGN KEY (`create_user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ファミリーTBL'"
+    },
+    {
+      "name": "family_invitations",
+      "type": "BASE TABLE",
+      "comment": "ファミリー招待TBL",
+      "columns": [
+        {
+          "name": "family_invitation_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリー招待ID"
+        },
+        {
+          "name": "family_member_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ファミリーメンバー権限ID"
+        },
+        {
+          "name": "invitation_code",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "招待コード"
+        },
+        {
+          "name": "host_user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "差出ユーザーID"
+        },
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "expiration_date",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "有効期限"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "family_id",
+          "def": "KEY family_id (family_id) USING BTREE",
+          "table": "family_invitations",
+          "columns": ["family_id"]
+        },
+        {
+          "name": "family_member_role_type_id",
+          "def": "KEY family_member_role_type_id (family_member_role_type_id) USING BTREE",
+          "table": "family_invitations",
+          "columns": ["family_member_role_type_id"]
+        },
+        {
+          "name": "host_user_id",
+          "def": "KEY host_user_id (host_user_id) USING BTREE",
+          "table": "family_invitations",
+          "columns": ["host_user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (family_invitation_id) USING BTREE",
+          "table": "family_invitations",
+          "columns": ["family_invitation_id"]
+        },
+        {
+          "name": "invitation_code",
+          "def": "UNIQUE KEY invitation_code (invitation_code) USING BTREE",
+          "table": "family_invitations",
+          "columns": ["invitation_code"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "family_invitations_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_member_role_type_id) REFERENCES family_member_role_type (family_member_role_type_id)",
+          "table": "family_invitations",
+          "referenced_table": "family_member_role_type",
+          "columns": ["family_member_role_type_id"],
+          "referenced_columns": ["family_member_role_type_id"]
+        },
+        {
+          "name": "family_invitations_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (host_user_id) REFERENCES users (user_id)",
+          "table": "family_invitations",
+          "referenced_table": "users",
+          "columns": ["host_user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "family_invitations_ibfk_3",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)",
+          "table": "family_invitations",
+          "referenced_table": "families",
+          "columns": ["family_id"],
+          "referenced_columns": ["family_id"]
+        },
+        {
+          "name": "invitation_code",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY invitation_code (invitation_code)",
+          "table": "family_invitations",
+          "columns": ["invitation_code"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (family_invitation_id)",
+          "table": "family_invitations",
+          "columns": ["family_invitation_id"]
+        }
+      ],
+      "def": "CREATE TABLE `family_invitations` (\n  `family_invitation_id` varchar(36) NOT NULL COMMENT 'ファミリー招待ID',\n  `family_member_role_type_id` int NOT NULL COMMENT 'ファミリーメンバー権限ID',\n  `invitation_code` varchar(255) NOT NULL COMMENT '招待コード',\n  `host_user_id` varchar(36) NOT NULL COMMENT '差出ユーザーID',\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `expiration_date` datetime(6) NOT NULL COMMENT '有効期限',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`family_invitation_id`),\n  UNIQUE KEY `invitation_code` (`invitation_code`),\n  KEY `family_member_role_type_id` (`family_member_role_type_id`),\n  KEY `host_user_id` (`host_user_id`),\n  KEY `family_id` (`family_id`),\n  CONSTRAINT `family_invitations_ibfk_1` FOREIGN KEY (`family_member_role_type_id`) REFERENCES `family_member_role_type` (`family_member_role_type_id`),\n  CONSTRAINT `family_invitations_ibfk_2` FOREIGN KEY (`host_user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `family_invitations_ibfk_3` FOREIGN KEY (`family_id`) REFERENCES `families` (`family_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ファミリー招待TBL'"
+    },
+    {
+      "name": "family_member_role_type",
+      "type": "BASE TABLE",
+      "comment": "ファミリーメンバー権限マスターTBL",
+      "columns": [
+        {
+          "name": "family_member_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "ファミリーメンバー権限ID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "権限名"
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "権限表示名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (family_member_role_type_id) USING BTREE",
+          "table": "family_member_role_type",
+          "columns": ["family_member_role_type_id"]
+        },
+        {
+          "name": "display_name",
+          "def": "UNIQUE KEY display_name (display_name) USING BTREE",
+          "table": "family_member_role_type",
+          "columns": ["display_name"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "family_member_role_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "family_member_role_type",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "display_name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY display_name (display_name)",
+          "table": "family_member_role_type",
+          "columns": ["display_name"]
+        },
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "family_member_role_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "family_member_role_type",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (family_member_role_type_id)",
+          "table": "family_member_role_type",
+          "columns": ["family_member_role_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `family_member_role_type` (\n  `family_member_role_type_id` int NOT NULL AUTO_INCREMENT COMMENT 'ファミリーメンバー権限ID',\n  `name` varchar(100) NOT NULL COMMENT '権限名',\n  `display_name` varchar(100) NOT NULL COMMENT '権限表示名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`family_member_role_type_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `display_name` (`display_name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ファミリーメンバー権限マスターTBL'"
+    },
+    {
+      "name": "family_members",
+      "type": "BASE TABLE",
+      "comment": "ファミリーメンバーTBL",
+      "columns": [
+        {
+          "name": "family_member_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーメンバーID"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "nickname",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "ニックネーム"
+        },
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "family_member_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ファミリーメンバー権限ID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "family_id",
+          "def": "KEY family_id (family_id) USING BTREE",
+          "table": "family_members",
+          "columns": ["family_id"]
+        },
+        {
+          "name": "family_member_role_type_id",
+          "def": "KEY family_member_role_type_id (family_member_role_type_id) USING BTREE",
+          "table": "family_members",
+          "columns": ["family_member_role_type_id"]
+        },
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "family_members",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (family_member_id) USING BTREE",
+          "table": "family_members",
+          "columns": ["family_member_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "family_members_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "family_members",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "family_members_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)",
+          "table": "family_members",
+          "referenced_table": "families",
+          "columns": ["family_id"],
+          "referenced_columns": ["family_id"]
+        },
+        {
+          "name": "family_members_ibfk_3",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_member_role_type_id) REFERENCES family_member_role_type (family_member_role_type_id)",
+          "table": "family_members",
+          "referenced_table": "family_member_role_type",
+          "columns": ["family_member_role_type_id"],
+          "referenced_columns": ["family_member_role_type_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (family_member_id)",
+          "table": "family_members",
+          "columns": ["family_member_id"]
+        }
+      ],
+      "def": "CREATE TABLE `family_members` (\n  `family_member_id` varchar(36) NOT NULL COMMENT 'ファミリーメンバーID',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `nickname` varchar(100) NOT NULL COMMENT 'ニックネーム',\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `family_member_role_type_id` int NOT NULL COMMENT 'ファミリーメンバー権限ID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`family_member_id`),\n  KEY `user_id` (`user_id`),\n  KEY `family_id` (`family_id`),\n  KEY `family_member_role_type_id` (`family_member_role_type_id`),\n  CONSTRAINT `family_members_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `family_members_ibfk_2` FOREIGN KEY (`family_id`) REFERENCES `families` (`family_id`),\n  CONSTRAINT `family_members_ibfk_3` FOREIGN KEY (`family_member_role_type_id`) REFERENCES `family_member_role_type` (`family_member_role_type_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ファミリーメンバーTBL'"
+    },
+    {
+      "name": "flyway_schema_history",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "installed_rank",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "version",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "type",
+          "type": "varchar(20)",
+          "nullable": false
+        },
+        {
+          "name": "script",
+          "type": "varchar(1000)",
+          "nullable": false
+        },
+        {
+          "name": "checksum",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "installed_by",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "installed_on",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP",
+          "extra_def": "DEFAULT_GENERATED"
+        },
+        {
+          "name": "execution_time",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "success",
+          "type": "tinyint(1)",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "flyway_schema_history_s_idx",
+          "def": "KEY flyway_schema_history_s_idx (success) USING BTREE",
+          "table": "flyway_schema_history",
+          "columns": ["success"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (installed_rank) USING BTREE",
+          "table": "flyway_schema_history",
+          "columns": ["installed_rank"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (installed_rank)",
+          "table": "flyway_schema_history",
+          "columns": ["installed_rank"]
+        }
+      ],
+      "def": "CREATE TABLE `flyway_schema_history` (\n  `installed_rank` int NOT NULL,\n  `version` varchar(50) DEFAULT NULL,\n  `description` varchar(200) NOT NULL,\n  `type` varchar(20) NOT NULL,\n  `script` varchar(1000) NOT NULL,\n  `checksum` int DEFAULT NULL,\n  `installed_by` varchar(100) NOT NULL,\n  `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `execution_time` int NOT NULL,\n  `success` tinyint(1) NOT NULL,\n  PRIMARY KEY (`installed_rank`),\n  KEY `flyway_schema_history_s_idx` (`success`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci"
+    },
+    {
+      "name": "one_time_passwords",
+      "type": "BASE TABLE",
+      "comment": "ワンタイムパスワードTBL",
+      "columns": [
+        {
+          "name": "one_time_password_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ワンタイムパスワードID"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "encrypted_secret_key",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "暗号化済みシークレットキー"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "one_time_passwords",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (one_time_password_id) USING BTREE",
+          "table": "one_time_passwords",
+          "columns": ["one_time_password_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "one_time_passwords_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "one_time_passwords",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (one_time_password_id)",
+          "table": "one_time_passwords",
+          "columns": ["one_time_password_id"]
+        }
+      ],
+      "def": "CREATE TABLE `one_time_passwords` (\n  `one_time_password_id` varchar(36) NOT NULL COMMENT 'ワンタイムパスワードID',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `encrypted_secret_key` varchar(255) NOT NULL COMMENT '暗号化済みシークレットキー',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`one_time_password_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `one_time_passwords_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ワンタイムパスワードTBL'"
+    },
+    {
+      "name": "post_contents",
+      "type": "BASE TABLE",
+      "comment": "ポストコンテンツTBL",
+      "columns": [
+        {
+          "name": "post_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ポストID"
+        },
+        {
+          "name": "content_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "コンテントID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "content_id",
+          "def": "KEY content_id (content_id) USING BTREE",
+          "table": "post_contents",
+          "columns": ["content_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (post_id, content_id) USING BTREE",
+          "table": "post_contents",
+          "columns": ["post_id", "content_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "post_contents_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (post_id) REFERENCES posts (post_id)",
+          "table": "post_contents",
+          "referenced_table": "posts",
+          "columns": ["post_id"],
+          "referenced_columns": ["post_id"]
+        },
+        {
+          "name": "post_contents_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (content_id) REFERENCES contents (content_id)",
+          "table": "post_contents",
+          "referenced_table": "contents",
+          "columns": ["content_id"],
+          "referenced_columns": ["content_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (post_id, content_id)",
+          "table": "post_contents",
+          "columns": ["post_id", "content_id"]
+        }
+      ],
+      "def": "CREATE TABLE `post_contents` (\n  `post_id` varchar(36) NOT NULL COMMENT 'ポストID',\n  `content_id` varchar(36) NOT NULL COMMENT 'コンテントID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`post_id`,`content_id`),\n  KEY `content_id` (`content_id`),\n  CONSTRAINT `post_contents_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`),\n  CONSTRAINT `post_contents_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `contents` (`content_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ポストコンテンツTBL'"
+    },
+    {
+      "name": "posts",
+      "type": "BASE TABLE",
+      "comment": "コンテント投稿TBL",
+      "columns": [
+        {
+          "name": "post_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ポストID"
+        },
+        {
+          "name": "publish_status_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "公開ステータスID"
+        },
+        {
+          "name": "content_publish_scope_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "コンテント公開範囲ID"
+        },
+        {
+          "name": "create_user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "family_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ファミリーID"
+        },
+        {
+          "name": "child_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "子どもID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "child_id",
+          "def": "KEY child_id (child_id) USING BTREE",
+          "table": "posts",
+          "columns": ["child_id"]
+        },
+        {
+          "name": "content_publish_scope_id",
+          "def": "KEY content_publish_scope_id (content_publish_scope_id) USING BTREE",
+          "table": "posts",
+          "columns": ["content_publish_scope_id"]
+        },
+        {
+          "name": "create_user_id",
+          "def": "KEY create_user_id (create_user_id) USING BTREE",
+          "table": "posts",
+          "columns": ["create_user_id"]
+        },
+        {
+          "name": "family_id",
+          "def": "KEY family_id (family_id) USING BTREE",
+          "table": "posts",
+          "columns": ["family_id"]
+        },
+        {
+          "name": "publish_status_id",
+          "def": "KEY publish_status_id (publish_status_id) USING BTREE",
+          "table": "posts",
+          "columns": ["publish_status_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (post_id) USING BTREE",
+          "table": "posts",
+          "columns": ["post_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "posts_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (publish_status_id) REFERENCES publish_status (publish_status_id)",
+          "table": "posts",
+          "referenced_table": "publish_status",
+          "columns": ["publish_status_id"],
+          "referenced_columns": ["publish_status_id"]
+        },
+        {
+          "name": "posts_ibfk_3",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (content_publish_scope_id) REFERENCES content_publish_scope (content_publish_scope_id)",
+          "table": "posts",
+          "referenced_table": "content_publish_scope",
+          "columns": ["content_publish_scope_id"],
+          "referenced_columns": ["content_publish_scope_id"]
+        },
+        {
+          "name": "posts_ibfk_4",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)",
+          "table": "posts",
+          "referenced_table": "users",
+          "columns": ["create_user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "posts_ibfk_5",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)",
+          "table": "posts",
+          "referenced_table": "families",
+          "columns": ["family_id"],
+          "referenced_columns": ["family_id"]
+        },
+        {
+          "name": "posts_ibfk_6",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (child_id) REFERENCES children (child_id)",
+          "table": "posts",
+          "referenced_table": "children",
+          "columns": ["child_id"],
+          "referenced_columns": ["child_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (post_id)",
+          "table": "posts",
+          "columns": ["post_id"]
+        }
+      ],
+      "def": "CREATE TABLE `posts` (\n  `post_id` varchar(36) NOT NULL COMMENT 'ポストID',\n  `publish_status_id` int NOT NULL COMMENT '公開ステータスID',\n  `content_publish_scope_id` int NOT NULL COMMENT 'コンテント公開範囲ID',\n  `create_user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `family_id` varchar(36) NOT NULL COMMENT 'ファミリーID',\n  `child_id` varchar(36) NOT NULL COMMENT '子どもID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`post_id`),\n  KEY `publish_status_id` (`publish_status_id`),\n  KEY `content_publish_scope_id` (`content_publish_scope_id`),\n  KEY `create_user_id` (`create_user_id`),\n  KEY `family_id` (`family_id`),\n  KEY `child_id` (`child_id`),\n  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`publish_status_id`) REFERENCES `publish_status` (`publish_status_id`),\n  CONSTRAINT `posts_ibfk_3` FOREIGN KEY (`content_publish_scope_id`) REFERENCES `content_publish_scope` (`content_publish_scope_id`),\n  CONSTRAINT `posts_ibfk_4` FOREIGN KEY (`create_user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `posts_ibfk_5` FOREIGN KEY (`family_id`) REFERENCES `families` (`family_id`),\n  CONSTRAINT `posts_ibfk_6` FOREIGN KEY (`child_id`) REFERENCES `children` (`child_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='コンテント投稿TBL'"
+    },
+    {
+      "name": "publish_status",
+      "type": "BASE TABLE",
+      "comment": "公開ステータスマスターTBL",
+      "columns": [
+        {
+          "name": "publish_status_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "公開ステータスID"
+        },
+        {
+          "name": "publish_status_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "公開ステータス名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (publish_status_id) USING BTREE",
+          "table": "publish_status",
+          "columns": ["publish_status_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "publish_status",
+          "columns": ["explanation"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "publish_status",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (publish_status_id)",
+          "table": "publish_status",
+          "columns": ["publish_status_id"]
+        }
+      ],
+      "def": "CREATE TABLE `publish_status` (\n  `publish_status_id` int NOT NULL COMMENT '公開ステータスID',\n  `publish_status_name` varchar(100) NOT NULL COMMENT '公開ステータス名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`publish_status_id`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='公開ステータスマスターTBL'"
+    },
+    {
+      "name": "recovery_codes",
+      "type": "BASE TABLE",
+      "comment": "リカバリーコードTBL",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "encrypted_recovery_code",
+          "type": "char(60)",
+          "nullable": false,
+          "comment": "暗号化済みリカバリーコード"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_id, encrypted_recovery_code) USING BTREE",
+          "table": "recovery_codes",
+          "columns": ["user_id", "encrypted_recovery_code"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_id, encrypted_recovery_code)",
+          "table": "recovery_codes",
+          "columns": ["user_id", "encrypted_recovery_code"]
+        },
+        {
+          "name": "recovery_codes_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "recovery_codes",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        }
+      ],
+      "def": "CREATE TABLE `recovery_codes` (\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `encrypted_recovery_code` char(60) NOT NULL COMMENT '暗号化済みリカバリーコード',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_id`,`encrypted_recovery_code`),\n  CONSTRAINT `recovery_codes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='リカバリーコードTBL'"
+    },
+    {
+      "name": "sex",
+      "type": "BASE TABLE",
+      "comment": "性別マスターTBL",
+      "columns": [
+        {
+          "name": "sex_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "性別ID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "性別名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (sex_id) USING BTREE",
+          "table": "sex",
+          "columns": ["sex_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "sex",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "sex",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "sex",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "sex",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (sex_id)",
+          "table": "sex",
+          "columns": ["sex_id"]
+        }
+      ],
+      "def": "CREATE TABLE `sex` (\n  `sex_id` int NOT NULL AUTO_INCREMENT COMMENT '性別ID',\n  `name` varchar(100) NOT NULL COMMENT '性別名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`sex_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='性別マスターTBL'"
+    },
+    {
+      "name": "temporarily_user_status",
+      "type": "BASE TABLE",
+      "comment": "仮ユーザーステータスマスターTBl",
+      "columns": [
+        {
+          "name": "temporarily_user_status_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "仮ユーザーステータスID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "ステータス名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (temporarily_user_status_id) USING BTREE",
+          "table": "temporarily_user_status",
+          "columns": ["temporarily_user_status_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "temporarily_user_status",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "temporarily_user_status",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "temporarily_user_status",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "temporarily_user_status",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (temporarily_user_status_id)",
+          "table": "temporarily_user_status",
+          "columns": ["temporarily_user_status_id"]
+        }
+      ],
+      "def": "CREATE TABLE `temporarily_user_status` (\n  `temporarily_user_status_id` int NOT NULL AUTO_INCREMENT COMMENT '仮ユーザーステータスID',\n  `name` varchar(100) NOT NULL COMMENT 'ステータス名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`temporarily_user_status_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='仮ユーザーステータスマスターTBl'"
+    },
+    {
+      "name": "temporarily_users",
+      "type": "BASE TABLE",
+      "comment": "仮ユーザーTBL",
+      "columns": [
+        {
+          "name": "temporarily_user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "仮ユーザーID"
+        },
+        {
+          "name": "temporarily_user_status_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "仮ユーザーステータスID"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "メールアドレス"
+        },
+        {
+          "name": "user_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ユーザー権限ID"
+        },
+        {
+          "name": "password",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "パスワード"
+        },
+        {
+          "name": "activate_token",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "アクティベートトークン"
+        },
+        {
+          "name": "expiration_date",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "有効期限"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "temporarily_user_status_id",
+          "def": "KEY temporarily_user_status_id (temporarily_user_status_id) USING BTREE",
+          "table": "temporarily_users",
+          "columns": ["temporarily_user_status_id"]
+        },
+        {
+          "name": "user_role_type_id",
+          "def": "KEY user_role_type_id (user_role_type_id) USING BTREE",
+          "table": "temporarily_users",
+          "columns": ["user_role_type_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (temporarily_user_id) USING BTREE",
+          "table": "temporarily_users",
+          "columns": ["temporarily_user_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (temporarily_user_id)",
+          "table": "temporarily_users",
+          "columns": ["temporarily_user_id"]
+        },
+        {
+          "name": "temporarily_users_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (temporarily_user_status_id) REFERENCES temporarily_user_status (temporarily_user_status_id)",
+          "table": "temporarily_users",
+          "referenced_table": "temporarily_user_status",
+          "columns": ["temporarily_user_status_id"],
+          "referenced_columns": ["temporarily_user_status_id"]
+        },
+        {
+          "name": "temporarily_users_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_role_type_id) REFERENCES user_role_type (user_role_type_id)",
+          "table": "temporarily_users",
+          "referenced_table": "user_role_type",
+          "columns": ["user_role_type_id"],
+          "referenced_columns": ["user_role_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `temporarily_users` (\n  `temporarily_user_id` varchar(36) NOT NULL COMMENT '仮ユーザーID',\n  `temporarily_user_status_id` int NOT NULL COMMENT '仮ユーザーステータスID',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `email` varchar(255) NOT NULL COMMENT 'メールアドレス',\n  `user_role_type_id` int NOT NULL COMMENT 'ユーザー権限ID',\n  `password` varchar(100) NOT NULL COMMENT 'パスワード',\n  `activate_token` varchar(255) NOT NULL COMMENT 'アクティベートトークン',\n  `expiration_date` datetime(6) NOT NULL COMMENT '有効期限',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`temporarily_user_id`),\n  KEY `temporarily_user_status_id` (`temporarily_user_status_id`),\n  KEY `user_role_type_id` (`user_role_type_id`),\n  CONSTRAINT `temporarily_users_ibfk_1` FOREIGN KEY (`temporarily_user_status_id`) REFERENCES `temporarily_user_status` (`temporarily_user_status_id`),\n  CONSTRAINT `temporarily_users_ibfk_2` FOREIGN KEY (`user_role_type_id`) REFERENCES `user_role_type` (`user_role_type_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='仮ユーザーTBL'"
+    },
+    {
+      "name": "user_access_history",
+      "type": "BASE TABLE",
+      "comment": "ユーザーログイン履歴TBL",
+      "columns": [
+        {
+          "name": "user_access_history_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーアクセス履歴ID"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "user_access_status_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ユーザーアクセスステータスID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_access_status_id",
+          "def": "KEY user_access_status_id (user_access_status_id) USING BTREE",
+          "table": "user_access_history",
+          "columns": ["user_access_status_id"]
+        },
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "user_access_history",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_access_history_id) USING BTREE",
+          "table": "user_access_history",
+          "columns": ["user_access_history_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_access_history_id)",
+          "table": "user_access_history",
+          "columns": ["user_access_history_id"]
+        },
+        {
+          "name": "user_access_history_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "user_access_history",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "user_access_history_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_access_status_id) REFERENCES user_access_status (user_access_status_id)",
+          "table": "user_access_history",
+          "referenced_table": "user_access_status",
+          "columns": ["user_access_status_id"],
+          "referenced_columns": ["user_access_status_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_access_history` (\n  `user_access_history_id` varchar(36) NOT NULL COMMENT 'ユーザーアクセス履歴ID',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `user_access_status_id` int NOT NULL COMMENT 'ユーザーアクセスステータスID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_access_history_id`),\n  KEY `user_id` (`user_id`),\n  KEY `user_access_status_id` (`user_access_status_id`),\n  CONSTRAINT `user_access_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `user_access_history_ibfk_2` FOREIGN KEY (`user_access_status_id`) REFERENCES `user_access_status` (`user_access_status_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザーログイン履歴TBL'"
+    },
+    {
+      "name": "user_access_status",
+      "type": "BASE TABLE",
+      "comment": "ユーザーアクセスステータスマスターTBL",
+      "columns": [
+        {
+          "name": "user_access_status_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "ユーザーアクセスステータスID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(20)",
+          "nullable": false,
+          "comment": "ステータス"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_access_status_id) USING BTREE",
+          "table": "user_access_status",
+          "columns": ["user_access_status_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "user_access_status",
+          "columns": ["explanation"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "user_access_status",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_access_status_id)",
+          "table": "user_access_status",
+          "columns": ["user_access_status_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_access_status` (\n  `user_access_status_id` int NOT NULL AUTO_INCREMENT COMMENT 'ユーザーアクセスステータスID',\n  `name` varchar(20) NOT NULL COMMENT 'ステータス',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`user_access_status_id`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザーアクセスステータスマスターTBL'"
+    },
+    {
+      "name": "user_auth_token_blacklists",
+      "type": "BASE TABLE",
+      "comment": "ユーザー認証トークンブラックリストTBL",
+      "columns": [
+        {
+          "name": "token",
+          "type": "varchar(355)",
+          "nullable": false,
+          "comment": "トークン"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "user_auth_token_blacklists",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (token) USING BTREE",
+          "table": "user_auth_token_blacklists",
+          "columns": ["token"]
+        },
+        {
+          "name": "token",
+          "def": "UNIQUE KEY token (token) USING BTREE",
+          "table": "user_auth_token_blacklists",
+          "columns": ["token"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (token)",
+          "table": "user_auth_token_blacklists",
+          "columns": ["token"]
+        },
+        {
+          "name": "token",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY token (token)",
+          "table": "user_auth_token_blacklists",
+          "columns": ["token"]
+        },
+        {
+          "name": "user_auth_token_blacklists_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "user_auth_token_blacklists",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_auth_token_blacklists` (\n  `token` varchar(355) NOT NULL COMMENT 'トークン',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`token`),\n  UNIQUE KEY `token` (`token`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_auth_token_blacklists_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザー認証トークンブラックリストTBL'"
+    },
+    {
+      "name": "user_auths",
+      "type": "BASE TABLE",
+      "comment": "ユーザー認証TBL",
+      "columns": [
+        {
+          "name": "user_auth_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザー認証ID"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "password",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "パスワード"
+        },
+        {
+          "name": "login_failure_count",
+          "type": "int",
+          "nullable": false,
+          "comment": "ログイン失敗回数"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "user_auths",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_auth_id) USING BTREE",
+          "table": "user_auths",
+          "columns": ["user_auth_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_auth_id)",
+          "table": "user_auths",
+          "columns": ["user_auth_id"]
+        },
+        {
+          "name": "user_auths_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "user_auths",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_auths` (\n  `user_auth_id` varchar(36) NOT NULL COMMENT 'ユーザー認証ID',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `password` varchar(100) NOT NULL COMMENT 'パスワード',\n  `login_failure_count` int NOT NULL COMMENT 'ログイン失敗回数',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_auth_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_auths_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザー認証TBL'"
+    },
+    {
+      "name": "user_device_status",
+      "type": "BASE TABLE",
+      "comment": "ユーザーデバイスステータスマスターTBL",
+      "columns": [
+        {
+          "name": "user_device_status_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "ユーザーデバイスステータスID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(20)",
+          "nullable": false,
+          "comment": "ステータス"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_device_status_id) USING BTREE",
+          "table": "user_device_status",
+          "columns": ["user_device_status_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "user_device_status",
+          "columns": ["explanation"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "user_device_status",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_device_status_id)",
+          "table": "user_device_status",
+          "columns": ["user_device_status_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_device_status` (\n  `user_device_status_id` int NOT NULL AUTO_INCREMENT COMMENT 'ユーザーデバイスステータスID',\n  `name` varchar(20) NOT NULL COMMENT 'ステータス',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`user_device_status_id`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザーデバイスステータスマスターTBL'"
+    },
+    {
+      "name": "user_devices",
+      "type": "BASE TABLE",
+      "comment": "ユーザーデバイスTBL",
+      "columns": [
+        {
+          "name": "user_device_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーデバイスID"
+        },
+        {
+          "name": "user_device_status_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ユーザーデバイスステータス"
+        },
+        {
+          "name": "user_agent",
+          "type": "varchar(1024)",
+          "nullable": false,
+          "comment": "ユーザーエージェント"
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_device_status_id",
+          "def": "KEY user_device_status_id (user_device_status_id) USING BTREE",
+          "table": "user_devices",
+          "columns": ["user_device_status_id"]
+        },
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "user_devices",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_device_id) USING BTREE",
+          "table": "user_devices",
+          "columns": ["user_device_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_device_id)",
+          "table": "user_devices",
+          "columns": ["user_device_id"]
+        },
+        {
+          "name": "user_devices_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_device_status_id) REFERENCES user_device_status (user_device_status_id)",
+          "table": "user_devices",
+          "referenced_table": "user_device_status",
+          "columns": ["user_device_status_id"],
+          "referenced_columns": ["user_device_status_id"]
+        },
+        {
+          "name": "user_devices_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "user_devices",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_devices` (\n  `user_device_id` varchar(36) NOT NULL COMMENT 'ユーザーデバイスID',\n  `user_device_status_id` int NOT NULL COMMENT 'ユーザーデバイスステータス',\n  `user_agent` varchar(1024) NOT NULL COMMENT 'ユーザーエージェント',\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_device_id`),\n  KEY `user_device_status_id` (`user_device_status_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_devices_ibfk_1` FOREIGN KEY (`user_device_status_id`) REFERENCES `user_device_status` (`user_device_status_id`),\n  CONSTRAINT `user_devices_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザーデバイスTBL'"
+    },
+    {
+      "name": "user_profiles",
+      "type": "BASE TABLE",
+      "comment": "ユーザープロフィールTBL",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "comment": "メールアドレス"
+        },
+        {
+          "name": "user_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "comment": "ユーザー権限ID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_role_type_id",
+          "def": "KEY user_role_type_id (user_role_type_id) USING BTREE",
+          "table": "user_profiles",
+          "columns": ["user_role_type_id"]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_id) USING BTREE",
+          "table": "user_profiles",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "email",
+          "def": "UNIQUE KEY email (email) USING BTREE",
+          "table": "user_profiles",
+          "columns": ["email"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "email",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY email (email)",
+          "table": "user_profiles",
+          "columns": ["email"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_id)",
+          "table": "user_profiles",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "user_profiles_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)",
+          "table": "user_profiles",
+          "referenced_table": "users",
+          "columns": ["user_id"],
+          "referenced_columns": ["user_id"]
+        },
+        {
+          "name": "user_profiles_ibfk_2",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_role_type_id) REFERENCES user_role_type (user_role_type_id)",
+          "table": "user_profiles",
+          "referenced_table": "user_role_type",
+          "columns": ["user_role_type_id"],
+          "referenced_columns": ["user_role_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_profiles` (\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `email` varchar(255) NOT NULL COMMENT 'メールアドレス',\n  `user_role_type_id` int NOT NULL COMMENT 'ユーザー権限ID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `email` (`email`),\n  KEY `user_role_type_id` (`user_role_type_id`),\n  CONSTRAINT `user_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),\n  CONSTRAINT `user_profiles_ibfk_2` FOREIGN KEY (`user_role_type_id`) REFERENCES `user_role_type` (`user_role_type_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザープロフィールTBL'"
+    },
+    {
+      "name": "user_role_type",
+      "type": "BASE TABLE",
+      "comment": "ユーザー権限マスターTBL",
+      "columns": [
+        {
+          "name": "user_role_type_id",
+          "type": "int",
+          "nullable": false,
+          "extra_def": "auto_increment",
+          "comment": "ユーザー権限ID"
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "権限名"
+        },
+        {
+          "name": "explanation",
+          "type": "varchar(100)",
+          "nullable": false,
+          "comment": "説明"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_role_type_id) USING BTREE",
+          "table": "user_role_type",
+          "columns": ["user_role_type_id"]
+        },
+        {
+          "name": "explanation",
+          "def": "UNIQUE KEY explanation (explanation) USING BTREE",
+          "table": "user_role_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "def": "UNIQUE KEY name (name) USING BTREE",
+          "table": "user_role_type",
+          "columns": ["name"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "explanation",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY explanation (explanation)",
+          "table": "user_role_type",
+          "columns": ["explanation"]
+        },
+        {
+          "name": "name",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY name (name)",
+          "table": "user_role_type",
+          "columns": ["name"]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_role_type_id)",
+          "table": "user_role_type",
+          "columns": ["user_role_type_id"]
+        }
+      ],
+      "def": "CREATE TABLE `user_role_type` (\n  `user_role_type_id` int NOT NULL AUTO_INCREMENT COMMENT 'ユーザー権限ID',\n  `name` varchar(100) NOT NULL COMMENT '権限名',\n  `explanation` varchar(100) NOT NULL COMMENT '説明',\n  PRIMARY KEY (`user_role_type_id`),\n  UNIQUE KEY `name` (`name`),\n  UNIQUE KEY `explanation` (`explanation`)\n) ENGINE=InnoDB AUTO_INCREMENT=[Redacted by tbls] DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザー権限マスターTBL'"
+    },
+    {
+      "name": "users",
+      "type": "BASE TABLE",
+      "comment": "ユーザー情報TBL",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "nullable": false,
+          "comment": "ユーザーID"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(6)",
+          "nullable": false,
+          "comment": "作成日時"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (user_id) USING BTREE",
+          "table": "users",
+          "columns": ["user_id"]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (user_id)",
+          "table": "users",
+          "columns": ["user_id"]
+        }
+      ],
+      "def": "CREATE TABLE `users` (\n  `user_id` varchar(36) NOT NULL COMMENT 'ユーザーID',\n  `created_at` datetime(6) NOT NULL COMMENT '作成日時',\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='ユーザー情報TBL'"
+    }
+  ],
+  "relations": [
+    {
+      "table": "child_members",
+      "columns": ["child_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "children",
+      "parent_columns": ["child_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (child_id) REFERENCES children (child_id)"
+    },
+    {
+      "table": "child_members",
+      "columns": ["family_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "families",
+      "parent_columns": ["family_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)"
+    },
+    {
+      "table": "children",
+      "columns": ["sex_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "sex",
+      "parent_columns": ["sex_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (sex_id) REFERENCES sex (sex_id)"
+    },
+    {
+      "table": "content_blacklists",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "content_publish_scope_members",
+      "columns": ["content_publish_scope_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "content_publish_scope",
+      "parent_columns": ["content_publish_scope_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (content_publish_scope_id) REFERENCES content_publish_scope (content_publish_scope_id)"
+    },
+    {
+      "table": "contents",
+      "columns": ["content_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "content_type",
+      "parent_columns": ["content_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (content_type_id) REFERENCES content_type (content_type_id)"
+    },
+    {
+      "table": "contents",
+      "columns": ["content_media_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "content_media_type",
+      "parent_columns": ["content_media_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (content_media_type_id) REFERENCES content_media_type (content_media_type_id)"
+    },
+    {
+      "table": "contents",
+      "columns": ["create_user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "contents",
+      "columns": ["family_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "families",
+      "parent_columns": ["family_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)"
+    },
+    {
+      "table": "families",
+      "columns": ["create_user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "family_invitations",
+      "columns": ["family_member_role_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "family_member_role_type",
+      "parent_columns": ["family_member_role_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_member_role_type_id) REFERENCES family_member_role_type (family_member_role_type_id)"
+    },
+    {
+      "table": "family_invitations",
+      "columns": ["host_user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (host_user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "family_invitations",
+      "columns": ["family_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "families",
+      "parent_columns": ["family_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)"
+    },
+    {
+      "table": "family_members",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "family_members",
+      "columns": ["family_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "families",
+      "parent_columns": ["family_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)"
+    },
+    {
+      "table": "family_members",
+      "columns": ["family_member_role_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "family_member_role_type",
+      "parent_columns": ["family_member_role_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_member_role_type_id) REFERENCES family_member_role_type (family_member_role_type_id)"
+    },
+    {
+      "table": "one_time_passwords",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "post_contents",
+      "columns": ["post_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "posts",
+      "parent_columns": ["post_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (post_id) REFERENCES posts (post_id)"
+    },
+    {
+      "table": "post_contents",
+      "columns": ["content_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "contents",
+      "parent_columns": ["content_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (content_id) REFERENCES contents (content_id)"
+    },
+    {
+      "table": "posts",
+      "columns": ["publish_status_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "publish_status",
+      "parent_columns": ["publish_status_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (publish_status_id) REFERENCES publish_status (publish_status_id)"
+    },
+    {
+      "table": "posts",
+      "columns": ["content_publish_scope_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "content_publish_scope",
+      "parent_columns": ["content_publish_scope_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (content_publish_scope_id) REFERENCES content_publish_scope (content_publish_scope_id)"
+    },
+    {
+      "table": "posts",
+      "columns": ["create_user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (create_user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "posts",
+      "columns": ["family_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "families",
+      "parent_columns": ["family_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (family_id) REFERENCES families (family_id)"
+    },
+    {
+      "table": "posts",
+      "columns": ["child_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "children",
+      "parent_columns": ["child_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (child_id) REFERENCES children (child_id)"
+    },
+    {
+      "table": "recovery_codes",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "temporarily_users",
+      "columns": ["temporarily_user_status_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "temporarily_user_status",
+      "parent_columns": ["temporarily_user_status_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (temporarily_user_status_id) REFERENCES temporarily_user_status (temporarily_user_status_id)"
+    },
+    {
+      "table": "temporarily_users",
+      "columns": ["user_role_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_role_type",
+      "parent_columns": ["user_role_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_role_type_id) REFERENCES user_role_type (user_role_type_id)"
+    },
+    {
+      "table": "user_access_history",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "user_access_history",
+      "columns": ["user_access_status_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_access_status",
+      "parent_columns": ["user_access_status_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_access_status_id) REFERENCES user_access_status (user_access_status_id)"
+    },
+    {
+      "table": "user_auth_token_blacklists",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "user_auths",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "user_devices",
+      "columns": ["user_device_status_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_device_status",
+      "parent_columns": ["user_device_status_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_device_status_id) REFERENCES user_device_status (user_device_status_id)"
+    },
+    {
+      "table": "user_devices",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "user_profiles",
+      "columns": ["user_id"],
+      "cardinality": "zero_or_one",
+      "parent_table": "users",
+      "parent_columns": ["user_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users (user_id)"
+    },
+    {
+      "table": "user_profiles",
+      "columns": ["user_role_type_id"],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_role_type",
+      "parent_columns": ["user_role_type_id"],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_role_type_id) REFERENCES user_role_type (user_role_type_id)"
+    }
+  ],
+  "driver": {
+    "name": "mysql",
+    "database_version": "9.3.0",
+    "meta": {
+      "dict": {
+        "Functions": "Stored procedures and functions"
+      }
+    }
+  }
+}

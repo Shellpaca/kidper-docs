@@ -1,0 +1,81 @@
+---
+id: chunk-upload
+title: "コンテンツチャンクアップロードAPI"
+description: "            「大きいファイル用のチャンク分割」"
+sidebar_label: "コンテンツチャンクアップロードAPI"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "put api-method"
+info_path: apis/APIs/kidper-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"コンテンツチャンクアップロードAPI"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/api/v1/posts/{postId}/contents:chunks-upload"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+
+            「大きいファイル用のチャンク分割」
+            
+            コンテンツファイルを複数のチャンクに分割し、チャンク単位でアップロードする。
+            すべてのチャンクアップロード完了後、コンテンツチャンクアップロード結合APIを実行することで、
+            1つのコンテンツファイルとして構成される。
+    
+            同一チャンク（同一のチャンク番号）に対するリトライは可能であり、リトライ時には該当チャンクは上書きされる。
+            チャンクのアップロードは並列に実行することができる。
+        
+            事前条件
+              - 1チャンクあたりのファイルサイズは 4MB 以下であること
+        
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./chunk-upload.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./chunk-upload.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./chunk-upload.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

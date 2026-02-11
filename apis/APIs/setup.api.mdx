@@ -1,0 +1,69 @@
+---
+id: setup
+title: "OTPセットアップAPI"
+description: "OTPの仮登録、OTP認証URIを作成する。"
+sidebar_label: "OTPセットアップAPI"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: apis/APIs/kidper-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"OTPセットアップAPI"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/api/v1/auth/otp/setup"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+OTPの仮登録、OTP認証URIを作成する。
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./setup.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./setup.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./setup.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

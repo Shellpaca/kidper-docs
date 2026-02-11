@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"title":"招待ファミリー登録リクエスト","required":["nickname"],"type":"object","properties":{"nickname":{"maxLength":20,"minLength":1,"type":"string","description":"ニックネーム","example":"パパ"}},"description":"取得するファミリー招待の情報"}}},"required":true}}

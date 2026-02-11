@@ -1,0 +1,7 @@
+{
+  "label": "UI",
+  "link": {
+    "type": "generated-index",
+    "description": "画面・操作・状態・遷移を定義する"
+  }
+}

@@ -1,0 +1,38 @@
+---
+id: コンテンツ
+title: "コンテンツ"
+description: "コンテンツ"
+custom_edit_url: null
+---
+
+
+
+
+        コンテンツ（画像・動画など）に関するAPI群。
+
+        【アップロード】
+        - 小容量コンテンツ（4MB以下）を1回でアップロードしてポストする
+            - コンテンツアップロードAPI
+
+        - 大容量コンテンツをチャンクに分割してアップロードする
+            - コンテンツチャンクアップロードAPI
+            - コンテンツチャンクアップロード結合API
+
+        【ダウンロード / 取得】
+        - オリジナルのコンテンツファイルをダウンロードする
+            - コンテンツファイルダウンロードAPI
+
+        - ポスト経由でコンテンツ情報およびバイナリを取得する
+            - ポスト取得API（ポストを参照）
+            - コンテンツファイル取得API
+
+
+
+
+```mdx-code-block
+import DocCardList from '@theme/DocCardList';
+import {useCurrentSidebarCategory} from '@docusaurus/theme-common';
+
+<DocCardList items={useCurrentSidebarCategory().items}/>
+```
+      

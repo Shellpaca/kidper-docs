@@ -1,0 +1,1 @@
+{"parameters":[{"name":"familyId","in":"path","description":"ファミリーID","required":true,"schema":{"maxLength":36,"minLength":36,"pattern":"UUID","type":"string","description":"ファミリーID","example":"44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"},"example":"44fc7ab7-26f2-db6c-0dad-3bdf6143e3b6"}]}

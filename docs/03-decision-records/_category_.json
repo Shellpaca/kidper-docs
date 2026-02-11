@@ -1,0 +1,7 @@
+{
+  "label": "アーキテクチャ意思決定",
+  "link": {
+    "type": "generated-index",
+    "description": "Architecture Decision Records（ADR）は、設計上の「判断」と「理由」を将来に残す"
+  }
+}

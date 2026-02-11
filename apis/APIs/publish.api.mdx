@@ -1,0 +1,69 @@
+---
+id: publish
+title: "ポスト公開API"
+description: "ポストの公開ステータスを公開に変更する"
+sidebar_label: "ポスト公開API"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWW1P21YU/ivR/bRVzuIEKNTfMla2rNWEWtA+oHy4sS/Ea2Kb6xsEiyxhe12JAGlDjJahrkVjg/Ul00SltaUqP+aSUP5Fda6dN5KyMDSkSf6S2PflnOee5zzXvj5lxPCMjZQpxP2H3HvF/SWUlZBGbJXqFtNNAymtLu5Wa3efnWwsi9vvuf+Ge4dw7a2F7e7T2k6lvvWCu5vcW0YSMi1CMdjJaEhBVilX0O08kpCFKS4SRig4LyMDFwlSUEYjRctkxFAX4jfIApKQDgDyBGuEIglRMlvSKdGQwmiJSMhW86SIkVJGbMECAzajujGDHEdq2rRMm2W0hikLM3D/gQVmPjvTSRHP3yTGDMsjZeCqhIq60X5rYcYIBXuTk8JQJ6aznZJ5XLQKMHyQJIexPDQcl0euXY2P4JHBOJ5OJePyECE5TVZTwykNOeefkYWV2ZZp2MSGxaTkQfjrBPWVGRs1DUYMBi4GZbl7yKdYi90isyViMyQhNRytlNGVxBX4a+NEZwLfycby8ebr4/U97u1x/w9IG/+ZWPtD7u9z71VH0KdQkdg2niEQQWEh2wylmfuGqODWopBYTA+WEjo6nQVdEYdk3YE89p92hLwT4D73K4KcHXG9BJFoQPpHH0dvl2s7G9ytHu9VT7Z/4e46d/dAFluva9WfuVvl/jb3fe4dCPW85N7au8P12mpLMS1Y6fEMd1fq/r6YeZ+7v3P3O+4+gV//Cff+BLihMFdOFl3uVbi3wt23YvAjvuiBELqCEHJQ9+/WHv+FHMcRTCe7mZ40cInlTap/S7Q+qe6TYUKpSUdNDThuZ7tIbIaL1nmYb0zpm/3HYsM6FNze54tee/iPt17UKqvcrdY3vdrSQQcbKTk1GJeTcTk5kUwpsqzI8ifJ1ABkx0Xz7xSbRy9X689/FRpvxqkP443Ie/si/pVOF63utXfPH9SWfgtW3Br9f85ysKeSEF1/4IXgHx1X79UriwC4lbgdyE/x9KMYtB0++fw33F3h/g+A078nGv/m/i6klrvb7uYcOhzo1uGYSXO6phEjEmEkwkiElyDCnm9GLDZmlozoSRiJMBLhZYjwWrcIR01juqCr/R48Ig1GGow0eAENplK9ToUWNVXgJlcgsesG09lCpMdIj5EeL0GPPU6HN031TvR9JlJgpMBLUOBQry/iGQO+++NC7Dahc4TGrkNWRIKMBBkJ8j8WpKCA5U0tqOypQWURCnIogS09MZdMQPnPTpSDKqCTaFUgbSHWoPxYogUoMzJmKYlEwVRxIW/aTBmRZbkrGp8TA0qaRIsFFmIwGaprNlFLFF6GwWKOYEpougRYprLt3bdhDwjE2D6oSQKg6Cp8io0DeoMpSAovxkxaxAwp6MuvJ0TMdGPabN9fbuiaRWgsPZ7pWkjQlR7PHB38VN99UN8C7iAkQfdcEtIE4lbEIknCemqzbhmUfHtYLrd2vgvVjsOAMDLPElYB6wYAElSVQ5anELZ0QJ1EAVQbSUhpVnwbZGclBHzC+HI5h20ySQuOA82zJUKBsKyE5jDV4Ugj6NN0cbzRkDKNCzY5Y4Ef3Qq36Y9jnRXdnujDRmzAkWkOF0pwhyR0hyy0StVO1pEa1P9rMB9CEHjqLrQ3wUDpPBiUVmGLaOuDpxikclNz4+mJ0S+Q47wHIecPow==
+sidebar_class_name: "patch api-method"
+info_path: apis/APIs/kidper-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ポスト公開API"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"patch"}
+  path={"/api/v1/posts/{postId}/publish"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+ポストの公開ステータスを公開に変更する
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./publish.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./publish.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./publish.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      
