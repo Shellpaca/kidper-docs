@@ -1,0 +1,16 @@
+.container {
+  overflow: scroll;
+  width: 100%;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  position: relative;
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, .2);
+}
+
+.externalLink {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  z-index: 1;
+  cursor: pointer;
+}
