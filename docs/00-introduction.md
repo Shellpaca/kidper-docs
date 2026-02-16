@@ -1,3 +1,25 @@
+---
+title: Introduction
+description: イントロダクション
+# draft: false      # true=未公開, false=公開
+# sidebar_label:
+# unlisted: false    #true=サイドバー非表示、false=表示
+doc-kind: doc
+maintenance: active
+audience:
+  - design # 設計判断をする人
+  - implementation # 実装する人
+  - verification # 正しさを検証する人
+  - operation # 運用・障害対応する人
+  - security # セキュリティ責任者
+  - documentation # ドキュメント整備者
+review-cycle: none
+tags:
+  - readme
+# related:
+# future:
+---
+
 # Introduction
 
 ## ドキュメントの目的

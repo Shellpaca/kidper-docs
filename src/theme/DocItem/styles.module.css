@@ -1,0 +1,137 @@
+.docMetaBar {
+  position: relative;
+  margin-bottom: .75rem;
+  padding: .75rem 1.25rem;
+}
+
+.metaBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.topRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.bottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.badge {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--ifm-breadcrumb-border-radius);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.8px;
+}
+
+.badgeUppercase {
+  text-transform: uppercase;
+}
+
+.kind {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.kindUsecase {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+.kindApi {
+  background: rgba(79, 70, 229, 0.08);
+  color: #4338ca;
+}
+
+.kindDomain {
+  background: rgba(107, 33, 168, 0.08);
+  color: #6d28d9;
+}
+
+.kindDoc {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.kindOperation {
+  background: rgba(234, 88, 12, 0.08);
+  color: #c2410c;
+}
+
+.kindSecurity {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+
+.kindTest {
+  background: rgba(13, 148, 136, 0.08);
+  color: #0f766e;
+}
+
+.audienceGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.maintenanceActive {
+  background: #16a34a;
+  color: white;
+}
+
+.maintenanceArchived {
+  background: #f59e0b;
+  color: white;
+}
+
+.maintenanceFrozen {
+  background: #6b7280;
+  color: white;
+}
+
+.audienceBadge {
+  background: white;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  font-size: 0.7rem;
+}
+
+.label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+  opacity: 0.7;
+}
+
+.reviewCycle {
+  font-weight: 600;
+}
+
+.reviewCycleEveryRelease {
+  color: var(--ifm-color-primary);
+}
+
+.reviewCycleQuarterly {
+  color: #c2410c;
+}
+
+.reviewCycleNone {
+  color: #6b7280;
+}
+
+.error {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+}

@@ -1,0 +1,49 @@
+.container {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+ul {
+  padding-left: 1rem;
+  margin: 0;
+}
+
+li {
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.linkItem {
+  margin-bottom: 0.75rem;
+  list-style: none;
+}
+
+.linkTitle {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.linkTitle:hover {
+  text-decoration: underline;
+}
+
+.linkPath {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 0.2rem;
+}

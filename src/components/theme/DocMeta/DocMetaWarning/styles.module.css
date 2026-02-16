@@ -1,0 +1,16 @@
+.warning {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.archived {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.frozen {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+}
